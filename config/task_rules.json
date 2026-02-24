@@ -1,0 +1,121 @@
+{
+  "task_types": {
+    "code": {
+      "keywords": [
+        "写代码", "写", "编写", "实现", "开发", "创建",
+        "调试", "debug", "修复", "bug", "fix",
+        "重构", "优化代码", "改进", "refactor",
+        "函数", "类", "模块", "API", "接口",
+        "测试", "单元测试", "爬虫", "脚本", "程序"
+      ],
+      "agent_template": "coder",
+      "model": "claude-opus-4-6",
+      "priority": "high"
+    },
+    "analysis": {
+      "keywords": [
+        "分析", "统计", "数据",
+        "趋势", "模式", "规律",
+        "报告", "总结", "汇总",
+        "对比", "比较", "评估"
+      ],
+      "agent_template": "analyst",
+      "model": "claude-sonnet-4-5",
+      "priority": "medium"
+    },
+    "monitor": {
+      "keywords": [
+        "监控", "检查", "状态",
+        "健康", "性能", "资源",
+        "CPU", "内存", "磁盘",
+        "进程", "服务", "系统"
+      ],
+      "agent_template": "monitor",
+      "model": "claude-sonnet-4-5",
+      "priority": "medium"
+    },
+    "research": {
+      "keywords": [
+        "搜索", "查找", "查询",
+        "研究", "调研", "了解",
+        "资料", "信息", "文档",
+        "什么是", "如何", "为什么"
+      ],
+      "agent_template": "researcher",
+      "model": "claude-sonnet-4-5",
+      "priority": "low"
+    },
+    "design": {
+      "keywords": [
+        "设计", "架构", "方案",
+        "规划", "蓝图", "框架",
+        "系统设计", "技术选型",
+        "数据库设计", "API设计",
+        "UI", "UX", "界面设计",
+        "交互设计", "原型", "mockup",
+        "布局", "样式", "配色"
+      ],
+      "agent_template": "designer",
+      "model": "claude-opus-4-6",
+      "priority": "high"
+    },
+    "test": {
+      "keywords": [
+        "测试", "test", "单元测试",
+        "集成测试", "回归测试", "自动化测试",
+        "覆盖率", "coverage", "断言",
+        "mock", "fixture", "pytest",
+        "验证", "QA", "质量保证"
+      ],
+      "agent_template": "tester",
+      "model": "claude-sonnet-4-5",
+      "priority": "medium"
+    },
+    "document": {
+      "keywords": [
+        "文档", "doc", "documentation",
+        "README", "说明", "手册",
+        "API文档", "注释", "changelog",
+        "知识库", "wiki", "指南"
+      ],
+      "agent_template": "documenter",
+      "model": "claude-sonnet-4-5",
+      "priority": "low"
+    },
+    "debug": {
+      "keywords": [
+        "调试", "debug", "排查",
+        "诊断", "定位", "bug",
+        "错误分析", "堆栈", "traceback",
+        "崩溃", "异常", "报错",
+        "问题诊断", "根因分析"
+      ],
+      "agent_template": "debugger",
+      "model": "claude-opus-4-6",
+      "priority": "high"
+    }
+  },
+  "complexity_indicators": {
+    "high": [
+      "复杂", "困难", "挑战",
+      "多步骤", "长期", "大型",
+      "架构", "系统", "完整"
+    ],
+    "medium": [
+      "中等", "一般", "标准",
+      "常规", "普通"
+    ],
+    "low": [
+      "简单", "快速", "小",
+      "基础", "入门"
+    ]
+  },
+  "auto_create_rules": {
+    "enabled": true,
+    "max_agents_per_type": 3,
+    "create_threshold": {
+      "task_queue_length": 2,
+      "agent_busy_rate": 0.8
+    }
+  }
+}
