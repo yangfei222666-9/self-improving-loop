@@ -145,15 +145,29 @@ loop = SelfImprovingLoop(notifier=MySlackNotifier(webhook_url="https://hooks..."
 
 ## Performance
 
+Measured locally with `benchmarks/overhead.py` (200 iterations per workload, Python 3.12, Windows):
+
+| Workload profile | Absolute overhead | Relative overhead |
+|---|---|---|
+| ~100 ms agent call (typical LLM) | +0.27 ms | **+0.3%** |
+| ~10 ms agent call (tool call) | +0.31 ms | **+3.0%** |
+| sub-millisecond call | +0.08 ms | >>% (don't wrap these) |
+
+The wrapper adds a stable **~300 μs of fixed cost per call** (trace append + threshold check). Whether that's negligible depends on your workload:
+
+- LLM calls (>500 ms): overhead is ≤0.06% — invisible
+- HTTP / DB calls (~30-100 ms): ≤1%
+- Fast in-memory work (<10 ms): 3%+ — reconsider whether you need this for those
+
+Rerun the benchmark on your own machine with `python benchmarks/overhead.py`.
+
+Separate operation costs (triggered occasionally, not per-call):
+
 | Operation | Cost |
 |---|---|
-| Tracking one execution | ~5 ms |
-| Failure analysis (only when triggered) | ~100 ms |
+| Failure analysis (only when threshold crossed) | ~100 ms |
 | Applying improvement config | ~200 ms |
 | Rollback execution | ~10 ms |
-| **Total overhead** | **<1%** |
-
-Measured against agent call latencies in the 500 ms – 30 s range (typical LLM / tool workloads).
 
 ---
 
