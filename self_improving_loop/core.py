@@ -274,6 +274,7 @@ class SelfImprovingLoop:
                         self.state.setdefault("backups", {})[agent_id] = {
                             "backup_id": backup_id,
                             "improvement_id": improvement_id,
+                            "improved_at": datetime.now().isoformat(),
                             "before_metrics": before_metrics,
                             "config_patch": config_patch,
                         }
@@ -342,7 +343,10 @@ class SelfImprovingLoop:
             return None
 
         # 计算改进后的指标
-        after_metrics = self._calculate_metrics(agent_id)
+        improved_at = parse_trace_timestamp({
+            "timestamp": backup_info.get("improved_at")
+        })
+        after_metrics = self._calculate_metrics(agent_id, since=improved_at)
 
         # 检查是否达到验证窗口
         if after_metrics["total_tasks"] < self.auto_rollback.VERIFICATION_WINDOW:
@@ -430,14 +434,14 @@ class SelfImprovingLoop:
 
         return None
 
-    def _calculate_metrics(self, agent_id: str) -> Dict:
+    def _calculate_metrics(self, agent_id: str, since: Optional[datetime] = None) -> Dict:
         """计算 Agent 的当前指标"""
         traces = self._load_traces(agent_id)
 
         # 获取自适应窗口
         _, analysis_window_hours, _ = self.adaptive_threshold.get_threshold(agent_id, traces)
 
-        cutoff = datetime.now() - timedelta(hours=analysis_window_hours)
+        cutoff = since or (datetime.now() - timedelta(hours=analysis_window_hours))
         recent_traces = [
             t for t in traces
             if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff

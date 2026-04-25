@@ -6,7 +6,7 @@ real config rollback, and the optional Yijing policy router.
 import json
 import multiprocessing
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -287,6 +287,43 @@ def test_check_and_rollback_reports_missing_backup_instead_of_silent_none(tmp_pa
     assert rollback_result["success"] is False
     assert rollback_result["restore_applied"] is False
     assert "Backup not found" in rollback_result["error"]
+
+
+def test_check_and_rollback_counts_only_post_improvement_traces(tmp_path: Path):
+    loop = SelfImprovingLoop(data_dir=str(tmp_path))
+    agent_id = "post-improvement-agent"
+    improvement_id = "improvement-post-window"
+    backup_id = loop.auto_rollback.backup_config(
+        agent_id=agent_id,
+        config={"mode": "baseline"},
+        improvement_id=improvement_id,
+    )
+    improved_at = datetime.now()
+    loop.state.setdefault("backups", {})[agent_id] = {
+        "backup_id": backup_id,
+        "improvement_id": improvement_id,
+        "improved_at": improved_at.isoformat(),
+        "before_metrics": {
+            "success_rate": 1.0,
+            "avg_duration_sec": 0.01,
+            "consecutive_failures": 0,
+            "total_tasks": 10,
+        },
+    }
+
+    old_timestamp = (improved_at - timedelta(minutes=5)).isoformat()
+    for index in range(loop.auto_rollback.VERIFICATION_WINDOW):
+        loop.trace_store.append({
+            "agent_id": agent_id,
+            "task": f"old-regression-{index}",
+            "success": False,
+            "duration_sec": 0.01,
+            "error": "old failure before improvement",
+            "context": {},
+            "timestamp": old_timestamp,
+        })
+
+    assert loop.check_and_rollback(agent_id) is None
 
 
 def test_execute_with_improvement_records_success(tmp_path: Path):
