@@ -17,7 +17,7 @@ Recorded: `2026-04-25T22:20:08+0800`
 - Release assets uploaded:
   - `self_improving_loop-0.1.1-py3-none-any.whl`
   - `self_improving_loop-0.1.1.tar.gz`
-- Local test suite: `42 passed`.
+- Local test suite: `45 passed`.
 - GitHub CI: passed on Python 3.9-3.12 across Ubuntu, macOS, and Windows.
 - Clean GitHub wheel install: passed.
 - CLI version check: `self-improving-loop 0.1.1`.

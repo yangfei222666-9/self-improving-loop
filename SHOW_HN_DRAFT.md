@@ -119,11 +119,11 @@ notice with redistributed code.
 - [x] README has at least one screenshot/asciinema-style recording (`assets/demo/self_improving_loop_demo.svg` + `.cast` + `.txt`)
 - [x] GitHub Release v0.1.1 exists with wheel + sdist attached
 - [ ] PyPI package is intentionally not used for this launch until package ownership is resolved
-- [ ] GitHub repo description is set from the release one-liner
+- [x] GitHub repo description is set from the release one-liner
 - [ ] Topics set: `ai-agents`, `self-improving`, `feedback-loop`, `python`, `llm`, `autonomous-agents`
 - [x] CHANGELOG.md with 0.1.1 entry
-- [ ] `tests/` passes (currently 45/45)
-- [ ] LICENSE file in repo root (MIT, already there)
+- [x] `tests/` passes (currently 45/45)
+- [x] LICENSE file in repo root (MIT, already there)
 - [ ] Sanity-run: `python -c "from self_improving_loop import SelfImprovingLoop; SelfImprovingLoop()"`
 
 ---

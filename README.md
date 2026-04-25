@@ -11,6 +11,8 @@
 
 Latest verified release: [v0.1.1](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1) · Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md)
 
+中文定位：`self-improving-loop` 是一个六爻状态机驱动的 AI Agent 可靠性与回滚层。它记录执行结果，把运行信号映射成六个工程爻位，选择受控策略补丁，并在 Agent 变差时自动回滚。
+
 Most "self-improving agent" projects stop at *"log the failures, let the next run read the log"*. That's a methodology, not a loop. **This package is the loop, implemented as a compact pure-stdlib Python runtime** — no framework lock-in, no LLM dependency, no cloud.
 
 The differentiator is the optional Yijing strategy: runtime signals are mapped
