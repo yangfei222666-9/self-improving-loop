@@ -60,7 +60,7 @@ building solo for 60 days with heavy AI-collab). This piece felt general
 enough to spin out.
 
 Honest caveats:
-  - 0.1.0. Smoke-tested (11 tests), but real-world battle testing is
+  - 0.1.0. Smoke-tested (29 tests), but real-world battle testing is
     ongoing. Bug reports very welcome.
   - The analysis_failure() step is statistical, not LLM-based. If you want
     LLM-authored config tweaks, subclass it.

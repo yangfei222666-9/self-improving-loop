@@ -18,7 +18,7 @@ Wrap any function, get:
 - 🛡 **Rollback trigger** when the new config regresses (>10% success drop, >20% latency gain, or 5 consecutive failures)
 - 📬 **Pluggable notifier** (stub by default — swap in Telegram / Slack / whatever)
 
-Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/TaijiOS), where it survived a 346-heartbeat Ising physics experiment and production-scale agent workloads.
+Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji), where it survived a 346-heartbeat Ising physics experiment and production-scale agent workloads.
 
 ---
 
@@ -235,7 +235,7 @@ Separate operation costs (triggered occasionally, not per-call):
 
 ## Background
 
-Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/TaijiOS) — a self-learning AI operating system with 5 *I Ching*–bound engines and a 346-heartbeat Ising physics experiment. The parent project has 14 modules; this one is the most generally reusable, so it lives as a standalone package.
+Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji) — a self-learning AI operating system with 5 *I Ching*–bound engines and a 346-heartbeat Ising physics experiment. The parent project has 14 modules; this one is the most generally reusable, so it lives as a standalone package.
 
 TaijiOS was built through multi-AI collaboration starting on **Chinese New Year 2026-02-17** (60 days before this release).
 
@@ -250,7 +250,7 @@ MIT. Ship it wherever.
 This is a very early release. Every bug report, every "didn't work for me", every "I wish it did X" is read:
 
 - GitHub Issue: [open one](https://github.com/yangfei222666-9/self-improving-loop/issues/new)
-- Parent project: [TaijiOS](https://github.com/yangfei222666-9/TaijiOS)
+- Parent project: [TaijiOS](https://github.com/yangfei222666-9/taiji)
 
 ---
 

@@ -48,7 +48,7 @@ dev = [
 Homepage = "https://github.com/yangfei222666-9/self-improving-loop"
 Repository = "https://github.com/yangfei222666-9/self-improving-loop"
 Issues = "https://github.com/yangfei222666-9/self-improving-loop/issues"
-"Parent Project" = "https://github.com/yangfei222666-9/TaijiOS"
+"Parent Project" = "https://github.com/yangfei222666-9/taiji"
 
 [tool.setuptools]
 packages = ["self_improving_loop"]
