@@ -32,7 +32,7 @@ jobs:
 
       - name: Compile core files
         run: |
-          python -m py_compile self_improving_loop/core.py self_improving_loop/threshold.py self_improving_loop/time_utils.py self_improving_loop/trace_store.py
+          python -m compileall -q self_improving_loop examples
 
       - name: Run tests
         run: |
@@ -43,6 +43,7 @@ jobs:
           python examples/01_basic_tracking.py
           python examples/02_config_rollback.py
           python examples/03_langgraph_adapter.py
+          python examples/04_yijing_strategy.py
           python examples/regression_rollback_demo.py
           python examples/wrap_existing_agent.py
           python examples/langgraph_style_node.py

@@ -15,6 +15,7 @@ Wrap any function, get:
 - 📊 **Automatic execution tracking** (success rate, latency, rolling window)
 - 🗄 **Trace storage choice**: readable JSONL by default, SQLite/WAL for multi-worker deployments
 - 🧠 **Adaptive thresholds** per agent profile (high-freq / mid-freq / low-freq / critical)
+- ☯️ **Optional hexagram state strategy**: six runtime dimensions → policy patch
 - 🛠 **Strategy hook** for proposing improvement configs when failure patterns are detected
 - 🧩 **ConfigAdapter contract** for real config backup / patch / restore
 - 🛡 **Rollback trigger** when the new config regresses (>10% success drop, >20% latency gain, or 5 consecutive failures)
@@ -45,12 +46,15 @@ Stable:
 - Optional SQLite/WAL trace storage
 - Strategy-triggered config patching
 - ConfigAdapter-backed rollback when a patch regresses
+- Optional Yijing hexagram strategy as a deterministic state router
 
 Experimental:
 
 - Choosing the best config patch automatically. The loop calls your
   `improvement_strategy`; it does not pretend to know your agent better than
   your production tests.
+- Full 64-hexagram policy coverage. The first Yijing strategy supports only
+  eight core states and should be treated as a bounded policy router.
 
 ---
 
@@ -84,7 +88,7 @@ To mutate and restore real agent config, provide a strategy hook plus either a
 
 ---
 
-## Run the three useful examples
+## Run the four useful examples
 
 Start here:
 
@@ -92,13 +96,15 @@ Start here:
 python examples/01_basic_tracking.py
 python examples/02_config_rollback.py
 python examples/03_langgraph_adapter.py
+python examples/04_yijing_strategy.py
 ```
 
-They prove the three important contracts:
+They prove the four important contracts:
 
 - `01_basic_tracking.py`: wrapper records traces and exposes stats.
 - `02_config_rollback.py`: a bad patch is applied, regression is detected, and `ConfigAdapter.rollback_config()` restores the previous config.
 - `03_langgraph_adapter.py`: a LangGraph-style node can be wrapped without adopting a new framework.
+- `04_yijing_strategy.py`: traces become six runtime lines, a hexagram state, and a bounded policy patch.
 
 For the verbose rollback event trail, run:
 
@@ -148,6 +154,39 @@ loop = SelfImprovingLoop(storage="sqlite")
 This writes `traces.sqlite3` with WAL mode enabled. The public API is unchanged:
 `execute_with_improvement()` records traces, and the loop reads them back for
 thresholds, metrics, and rollback checks.
+
+---
+
+## Optional Yijing policy strategy
+
+The Yijing layer is implemented as a deterministic state machine, not as a
+fortune-telling layer:
+
+`runtime traces -> six engineering lines -> hexagram state -> policy patch`
+
+The six lines are:
+
+1. stability
+2. efficiency
+3. learning activity
+4. routing accuracy
+5. collaboration
+6. governance
+
+Use it as an `improvement_strategy`:
+
+```python
+from self_improving_loop import SelfImprovingLoop, YijingEvolutionStrategy
+
+loop = SelfImprovingLoop(
+    improvement_strategy=YijingEvolutionStrategy(),
+    config_adapter=my_config_adapter,
+)
+```
+
+The first version supports eight core policy states: Qian, Kun, Zhen, Kan, Bo,
+Fu, Ji Ji, and Wei Ji. It returns a bounded config patch and relies on the same
+canary/rollback path as any other strategy.
 
 ---
 

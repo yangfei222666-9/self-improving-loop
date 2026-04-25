@@ -6,6 +6,7 @@ Run these in order. They are intentionally small and dependency-free.
 python examples/01_basic_tracking.py
 python examples/02_config_rollback.py
 python examples/03_langgraph_adapter.py
+python examples/04_yijing_strategy.py
 ```
 
 ## 01_basic_tracking.py
@@ -32,3 +33,11 @@ Shows the integration seam for LangGraph-style callables without depending on
 LangGraph. The same pattern applies to CrewAI, AutoGen, MCP tools, or an
 internal agent runner: wrap the callable you already trust.
 
+## 04_yijing_strategy.py
+
+Proves the Yijing layer is an engineering state machine, not decoration:
+
+`runtime traces -> six line scores -> hexagram state -> bounded policy patch`
+
+The first version intentionally supports only eight core policy states. It does
+not claim full 64-hexagram coverage.

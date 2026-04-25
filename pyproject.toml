@@ -51,7 +51,7 @@ Issues = "https://github.com/yangfei222666-9/self-improving-loop/issues"
 "Parent Project" = "https://github.com/yangfei222666-9/taiji"
 
 [tool.setuptools]
-packages = ["self_improving_loop"]
+packages = ["self_improving_loop", "self_improving_loop.yijing"]
 
 [tool.setuptools.package-data]
 self_improving_loop = ["*.md"]

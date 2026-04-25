@@ -13,6 +13,7 @@ from .rollback import AutoRollback
 from .threshold import AdaptiveThreshold
 from .notifier import TelegramNotifier
 from .trace_store import JsonlTraceStore, SQLiteTraceStore
+from .yijing import YijingEvolutionStrategy
 
 __all__ = [
     "SelfImprovingLoop",
@@ -22,4 +23,5 @@ __all__ = [
     "TelegramNotifier",
     "JsonlTraceStore",
     "SQLiteTraceStore",
+    "YijingEvolutionStrategy",
 ]

@@ -19,8 +19,10 @@ from self_improving_loop import (
     JsonlTraceStore,
     SQLiteTraceStore,
     TelegramNotifier,
+    YijingEvolutionStrategy,
     __version__,
 )
+from self_improving_loop.yijing import identify_hexagram, score_lines
 from self_improving_loop.notifier import _encode_for_stdout
 
 
@@ -48,6 +50,7 @@ def test_imports_resolve():
     assert ConfigAdapter
     assert JsonlTraceStore
     assert SQLiteTraceStore
+    assert YijingEvolutionStrategy
     assert AutoRollback
     assert AdaptiveThreshold
     assert TelegramNotifier
@@ -285,6 +288,53 @@ def test_sqlite_trace_store_round_trip_and_agent_filter(tmp_path: Path):
 
     assert [row["task"] for row in store.load()] == ["first", "second"]
     assert [row["task"] for row in store.load(agent_id="b")] == ["second"]
+
+
+def test_yijing_identifies_core_hexagram_from_six_lines():
+    lines = score_lines([
+        {
+            "agent_id": "strong",
+            "task": "ok",
+            "success": True,
+            "duration_sec": 0.01,
+            "timestamp": "2026-04-25T00:00:00",
+        }
+        for _ in range(4)
+    ], {"success_rate": 1.0, "avg_duration_sec": 0.01, "consecutive_failures": 0})
+    state = identify_hexagram(lines)
+    assert state.binary == "111111"
+    assert state.name == "qian"
+    assert state.moving_lines == ()
+
+
+def test_yijing_strategy_returns_bounded_policy_patch():
+    strategy = YijingEvolutionStrategy(latency_target_sec=1.0)
+    patch = strategy.analyze(
+        agent_id="route-agent",
+        traces=[
+            {
+                "agent_id": "route-agent",
+                "task": "route",
+                "success": False,
+                "duration_sec": 2.0,
+                "error": "provider route schema handoff sync quota error",
+                "context": {"route_ok": False, "handoff_ok": False, "budget": "quota"},
+                "timestamp": "2026-04-25T00:00:00",
+            }
+        ],
+        before_metrics={
+            "success_rate": 0.0,
+            "avg_duration_sec": 2.0,
+            "total_tasks": 1,
+            "consecutive_failures": 3,
+        },
+    )
+    assert patch["strategy_source"] == "yijing_hexagram_state_machine"
+    assert patch["hexagram"]["binary"] == "000000"
+    assert patch["hexagram"]["name"] == "kun"
+    assert patch["policy_action"] == "conserve_and_rollback_bias"
+    assert patch["auto_apply_enabled"] is False
+    assert len(patch["dimensions"]) == 6
 
 
 def test_execute_with_improvement_captures_failure(tmp_path: Path):
