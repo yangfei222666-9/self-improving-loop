@@ -10,8 +10,27 @@ Telegram Notifier - Self-Improving Loop 通知
 """
 
 import json
+import sys
 from datetime import datetime
 from typing import Dict, Optional
+
+
+def _encode_for_stdout(text: str, encoding: Optional[str] = None) -> str:
+    """Return text that can be written to the current stdout encoding.
+
+    Windows CI can expose cp1252 stdout, which cannot encode emoji. The
+    notifier is non-critical telemetry, so it must degrade its display rather
+    than crash the caller.
+    """
+    target_encoding = encoding or getattr(sys.stdout, "encoding", None) or "utf-8"
+    try:
+        text.encode(target_encoding)
+        return text
+    except UnicodeEncodeError:
+        return text.encode(target_encoding, errors="replace").decode(
+            target_encoding,
+            errors="replace",
+        )
 
 
 class TelegramNotifier:
@@ -164,7 +183,7 @@ class TelegramNotifier:
             message: the formatted text
             priority: "normal" | "high"
         """
-        print(f"[{priority.upper()}] {message}")
+        print(_encode_for_stdout(f"[{priority.upper()}] {message}"))
 
 
 # ============================================================================

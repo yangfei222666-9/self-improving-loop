@@ -18,6 +18,7 @@ from self_improving_loop import (
     TelegramNotifier,
     __version__,
 )
+from self_improving_loop.notifier import _encode_for_stdout
 from self_improving_loop.trace_store import JsonlTraceStore
 
 
@@ -201,6 +202,12 @@ def test_notifier_default_is_noninvasive(capsys, tmp_path: Path):
     # stub prints to stdout; we just assert it didn't crash
     captured = capsys.readouterr()
     assert "x" in captured.out or captured.out == ""  # either format is fine
+
+
+def test_notifier_stdout_encoding_fallback_handles_windows_cp1252():
+    text = _encode_for_stdout("🔧 自动改进 • ok", encoding="cp1252")
+    text.encode("cp1252")
+    assert "ok" in text
 
 
 def test_custom_notifier_subclass_is_honored(tmp_path: Path):
