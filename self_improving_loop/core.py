@@ -256,6 +256,7 @@ class SelfImprovingLoop:
         self._log("info", f"触发 Agent {agent_id} 的改进循环")
 
         applied_count = 0
+        improvement_error: Optional[Dict[str, Any]] = None
         if self.improvement_strategy is None:
             self._log("info", "未配置 improvement_strategy，仅记录触发，不伪装 strategy-apply")
         else:
@@ -271,6 +272,7 @@ class SelfImprovingLoop:
                 )
             except Exception as e:
                 self._log("error", f"improvement_strategy.analyze 失败: {e}")
+                improvement_error = {"stage": "analyze", "error": str(e)}
                 config_patch = None
 
             if config_patch:
@@ -294,11 +296,24 @@ class SelfImprovingLoop:
                         }
                 except Exception as e:
                     self._log("error", f"improvement_strategy.apply 失败: {e}")
+                    improvement_error = {"stage": "apply", "error": str(e)}
 
-        if "last_improvement" not in self.state:
-            self.state["last_improvement"] = {}
-        self.state["last_improvement"][agent_id] = datetime.now().isoformat()
-        self._save_state()
+        state_changed = False
+        if applied_count > 0:
+            if "last_improvement" not in self.state:
+                self.state["last_improvement"] = {}
+            self.state["last_improvement"][agent_id] = datetime.now().isoformat()
+            self.state.get("last_improvement_error", {}).pop(agent_id, None)
+            state_changed = True
+        elif improvement_error is not None:
+            self.state.setdefault("last_improvement_error", {})[agent_id] = {
+                "timestamp": datetime.now().isoformat(),
+                **improvement_error,
+            }
+            state_changed = True
+
+        if state_changed:
+            self._save_state()
 
         return applied_count
 

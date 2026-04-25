@@ -173,6 +173,90 @@ def test_improvement_strategy_hook_applies_and_records_backup(tmp_path: Path):
     assert restarted.state["last_improvement"]["strategy-agent"]
 
 
+def test_execute_with_improvement_propagates_keyboard_interrupt_and_system_exit(tmp_path: Path):
+    loop = SelfImprovingLoop(data_dir=str(tmp_path))
+
+    def interrupt():
+        raise KeyboardInterrupt()
+
+    def exit_now():
+        raise SystemExit(2)
+
+    with pytest.raises(KeyboardInterrupt):
+        loop.execute_with_improvement(
+            agent_id="interrupt-agent",
+            task="operator interrupt",
+            execute_fn=interrupt,
+        )
+
+    with pytest.raises(SystemExit):
+        loop.execute_with_improvement(
+            agent_id="exit-agent",
+            task="process exit",
+            execute_fn=exit_now,
+        )
+
+
+def test_strategy_analyze_exception_records_error_not_fake_improvement(tmp_path: Path):
+    class Strategy:
+        def analyze(self, agent_id, traces, before_metrics):
+            raise RuntimeError("analysis config is broken")
+
+    loop = SelfImprovingLoop(data_dir=str(tmp_path), improvement_strategy=Strategy())
+    loop.adaptive_threshold.set_manual_threshold(
+        "strategy-error-agent",
+        failure_threshold=1,
+        analysis_window_hours=24,
+        cooldown_hours=0,
+    )
+
+    result = loop.execute_with_improvement(
+        agent_id="strategy-error-agent",
+        task="trigger broken analyze",
+        execute_fn=lambda: (_ for _ in ()).throw(ValueError("agent failed")),
+    )
+
+    assert result["improvement_triggered"] is True
+    assert result["improvement_applied"] == 0
+    assert "strategy-error-agent" not in loop.state.get("last_improvement", {})
+    error = loop.state["last_improvement_error"]["strategy-error-agent"]
+    assert error["stage"] == "analyze"
+    assert "analysis config is broken" in error["error"]
+
+
+def test_strategy_apply_exception_records_error_not_fake_improvement(tmp_path: Path):
+    class Strategy:
+        def current_config(self, agent_id):
+            return {"mode": "baseline"}
+
+        def analyze(self, agent_id, traces, before_metrics):
+            return {"mode": "candidate"}
+
+        def apply(self, agent_id, config_patch):
+            raise RuntimeError("apply hook failed")
+
+    loop = SelfImprovingLoop(data_dir=str(tmp_path), improvement_strategy=Strategy())
+    loop.adaptive_threshold.set_manual_threshold(
+        "strategy-apply-error-agent",
+        failure_threshold=1,
+        analysis_window_hours=24,
+        cooldown_hours=0,
+    )
+
+    result = loop.execute_with_improvement(
+        agent_id="strategy-apply-error-agent",
+        task="trigger broken apply",
+        execute_fn=lambda: (_ for _ in ()).throw(ValueError("agent failed")),
+    )
+
+    assert result["improvement_triggered"] is True
+    assert result["improvement_applied"] == 0
+    assert "strategy-apply-error-agent" not in loop.state.get("last_improvement", {})
+    error = loop.state["last_improvement_error"]["strategy-apply-error-agent"]
+    assert error["stage"] == "apply"
+    assert "apply hook failed" in error["error"]
+
+
 def test_config_adapter_applies_and_restores_real_config(tmp_path: Path):
     class Strategy:
         def __init__(self):
@@ -288,6 +372,49 @@ def test_check_and_rollback_reports_missing_backup_instead_of_silent_none(tmp_pa
     assert rollback_result["success"] is False
     assert rollback_result["restore_applied"] is False
     assert "Backup not found" in rollback_result["error"]
+
+
+def test_check_and_rollback_reports_restore_exception(tmp_path: Path):
+    class Adapter:
+        def rollback_config(self, agent_id, backup_config):
+            raise RuntimeError("restore channel unavailable")
+
+    loop = SelfImprovingLoop(data_dir=str(tmp_path), config_adapter=Adapter())
+    agent_id = "restore-failure-agent"
+    backup_id = loop.auto_rollback.backup_config(
+        agent_id=agent_id,
+        config={"mode": "baseline"},
+        improvement_id="improvement-restore-failure",
+    )
+    loop.state.setdefault("backups", {})[agent_id] = {
+        "backup_id": backup_id,
+        "improvement_id": "improvement-restore-failure",
+        "improved_at": datetime.now().isoformat(),
+        "before_metrics": {
+            "success_rate": 1.0,
+            "avg_duration_sec": 0.01,
+            "consecutive_failures": 0,
+            "total_tasks": 10,
+        },
+    }
+
+    for index in range(loop.auto_rollback.VERIFICATION_WINDOW):
+        loop._record_trace(
+            agent_id=agent_id,
+            task=f"regression-{index}",
+            success=False,
+            duration=0.01,
+            error="regression",
+            context=None,
+        )
+
+    rollback_result = loop.check_and_rollback(agent_id)
+
+    assert rollback_result is not None
+    assert rollback_result["success"] is False
+    assert rollback_result["restore_applied"] is False
+    assert "restore channel unavailable" in rollback_result["error"]
+    assert agent_id in loop.state.get("backups", {})
 
 
 def test_check_and_rollback_counts_only_post_improvement_traces(tmp_path: Path):
