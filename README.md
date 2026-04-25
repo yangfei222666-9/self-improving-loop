@@ -35,6 +35,25 @@ SQLite trace storage via `sqlite3`.
 
 ---
 
+## What is stable today
+
+Stable:
+
+- Execution tracking
+- Adaptive failure thresholds
+- JSONL trace storage with a cross-process lock
+- Optional SQLite/WAL trace storage
+- Strategy-triggered config patching
+- ConfigAdapter-backed rollback when a patch regresses
+
+Experimental:
+
+- Choosing the best config patch automatically. The loop calls your
+  `improvement_strategy`; it does not pretend to know your agent better than
+  your production tests.
+
+---
+
 ## 30-second example
 
 ```python
@@ -65,31 +84,27 @@ To mutate and restore real agent config, provide a strategy hook plus either a
 
 ---
 
-## Prove rollback in one command
+## Run the three useful examples
 
-Run the end-to-end safety demo:
+Start here:
+
+```bash
+python examples/01_basic_tracking.py
+python examples/02_config_rollback.py
+python examples/03_langgraph_adapter.py
+```
+
+They prove the three important contracts:
+
+- `01_basic_tracking.py`: wrapper records traces and exposes stats.
+- `02_config_rollback.py`: a bad patch is applied, regression is detected, and `ConfigAdapter.rollback_config()` restores the previous config.
+- `03_langgraph_adapter.py`: a LangGraph-style node can be wrapped without adopting a new framework.
+
+For the verbose rollback event trail, run:
 
 ```bash
 python examples/regression_rollback_demo.py
 ```
-
-Expected evidence:
-
-```text
-baseline pass
-failure detected
-improvement proposed
-backup created
-patch applied
-quality worse
-rollback executed
-final status recovered
-event trail written: /tmp/.../regression_rollback_event_trail.jsonl
-```
-
-The demo intentionally applies a bad patch via an `improvement_strategy`, then
-proves the runtime can restore the prior config and write an auditable event
-trail. It is not a mocked success path.
 
 ---
 
@@ -107,11 +122,11 @@ result = loop.execute_with_improvement(
 )
 ```
 
-Two dependency-free examples show the integration seam:
+Dependency-free examples show the integration seam:
 
 ```bash
+python examples/03_langgraph_adapter.py
 python examples/wrap_existing_agent.py
-python examples/langgraph_style_node.py
 ```
 
 The goal is narrow: traces, thresholds, guarded strategy application, and

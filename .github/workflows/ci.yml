@@ -40,6 +40,9 @@ jobs:
 
       - name: Run executable examples
         run: |
+          python examples/01_basic_tracking.py
+          python examples/02_config_rollback.py
+          python examples/03_langgraph_adapter.py
           python examples/regression_rollback_demo.py
           python examples/wrap_existing_agent.py
           python examples/langgraph_style_node.py
