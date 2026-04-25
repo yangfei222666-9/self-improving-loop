@@ -170,6 +170,8 @@ Start with:
 
 ```bash
 pip install self-improving-loop
+git clone https://github.com/yangfei222666-9/self-improving-loop.git
+cd self-improving-loop
 python examples/04_yijing_strategy.py
 ```
 
@@ -182,6 +184,7 @@ python examples/04_yijing_strategy.py
 
 ```bash
 pip install self-improving-loop
+git clone https://github.com/yangfei222666-9/self-improving-loop.git
+cd self-improving-loop
 python examples/04_yijing_strategy.py
 ```
-

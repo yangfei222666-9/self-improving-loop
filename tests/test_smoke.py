@@ -1,7 +1,7 @@
-"""
-Smoke tests — verify imports, basic instantiation, and core execution path.
-These are intentionally minimal; the full 17-test suite lives in the parent
-TaijiOS repo and is being ported here in follow-up PRs.
+"""Core safety-path tests for the public package.
+
+These tests cover import/install health, trace persistence, strategy patching,
+real config rollback, and the optional Yijing policy router.
 """
 import json
 import multiprocessing
@@ -96,6 +96,11 @@ def test_loop_supports_sqlite_trace_storage(tmp_path: Path):
     assert len(rows) == 1
     assert rows[0]["task"] == "sqlite-backed trace"
 
+    restarted = SelfImprovingLoop(data_dir=str(tmp_path), storage="sqlite")
+    restarted_rows = restarted._load_traces("sqlite-agent")
+    assert len(restarted_rows) == 1
+    assert restarted_rows[0]["task"] == "sqlite-backed trace"
+
 
 def test_loop_rejects_unknown_trace_storage(tmp_path: Path):
     with pytest.raises(ValueError, match="storage must be"):
@@ -161,6 +166,10 @@ def test_improvement_strategy_hook_applies_and_records_backup(tmp_path: Path):
     assert result["improvement_applied"] == 1
     assert strategy.applied == [("strategy-agent", {"timeout_sec": 45})]
     assert "strategy-agent" in loop.state["backups"]
+
+    restarted = SelfImprovingLoop(data_dir=str(tmp_path))
+    assert restarted.state["backups"]["strategy-agent"]["config_patch"] == {"timeout_sec": 45}
+    assert restarted.state["last_improvement"]["strategy-agent"]
 
 
 def test_config_adapter_applies_and_restores_real_config(tmp_path: Path):

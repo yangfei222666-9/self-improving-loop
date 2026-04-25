@@ -74,3 +74,10 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 |---|---|---|---|
 | Chinese launch copy | No dedicated Chinese or bilingual material. | Added `LAUNCH_COPY_BILINGUAL.md` with English and Chinese positioning, demo script, short posts, HN boundary, safe claims, and claims to avoid. | README links to `LAUNCH_COPY_BILINGUAL.md`. |
 | Overclaim guard | Launch wording could drift between English and Chinese channels. | Both languages explicitly say the Yijing layer is experimental, deterministic, and not full 64-hexagram coverage yet. | `LAUNCH_COPY_BILINGUAL.md` sections 6 and 7. |
+
+## Follow-up · persistence evidence
+
+| Item | Before | After | Evidence |
+|---|---|---|---|
+| Test framing | `tests/test_smoke.py` still described the suite as minimal and partially unported. | Updated the header to match current safety-path coverage. | `tests/test_smoke.py`. |
+| Restart persistence | SQLite trace and loop state persistence were implied but not explicitly asserted in restart-style tests. | Added assertions that SQLite traces and improvement backup state survive a new `SelfImprovingLoop` instance. | `tests/test_smoke.py`; test count remains `40`. |
