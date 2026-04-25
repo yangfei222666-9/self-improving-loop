@@ -381,11 +381,12 @@ def test_yijing_strategy_returns_bounded_policy_patch():
 
 
 def test_cli_version_outputs_version(capsys):
+    from self_improving_loop import __version__
     from self_improving_loop.cli import main
 
     assert main(["--version"]) == 0
     captured = capsys.readouterr()
-    assert "self-improving-loop 0.1.0" in captured.out
+    assert f"self-improving-loop {__version__}" in captured.out
 
 
 def test_execute_with_improvement_captures_failure(tmp_path: Path):

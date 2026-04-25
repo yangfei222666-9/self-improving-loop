@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1
+
+- Make the Yijing / hexagram-guided strategy the primary public entrypoint.
+- Add terminal demo recording artifacts and README embed.
+- Add bilingual launch copy for English and Chinese channels.
+- Add restart-persistence assertions for SQLite traces and loop state.
+- Add local release verification notes for wheel, sdist, CLI, and clean wheel install.
+- Keep `0.1.0` immutable on PyPI; publish the current release-ready package as `0.1.1`.
+
 ## 0.1.0
 
 - Add `SelfImprovingLoop` runtime wrapper for execution tracking, adaptive thresholds, strategy-triggered patches, and rollback checks.

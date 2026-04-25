@@ -67,7 +67,7 @@ Extracted from a larger project (TaijiOS, started on Chinese New Year
 enough to spin out.
 
 Honest caveats:
-  - 0.1.0. Smoke-tested (40 tests), but real-world battle testing is
+  - 0.1.1. Smoke-tested (40 tests), but real-world battle testing is
     ongoing. Bug reports very welcome.
   - The analysis_failure() step is statistical, not LLM-based. If you want
     LLM-authored config tweaks, subclass it.
@@ -101,7 +101,7 @@ not overlapping.
 
 **"Does it need an LLM to analyze failures?"**
 
-No. 0.1.0 uses statistical analysis (failure clustering by error
+No. 0.1.1 uses statistical analysis (failure clustering by error
 string, frequency buckets). If you want LLM-authored config tweaks,
 pass an `improvement_strategy` object and call your model inside its
 `analyze()` method. The base stays LLM-free.
@@ -121,7 +121,7 @@ notice with redistributed code.
 - [ ] TestPyPI dry-run works before production PyPI release
 - [ ] GitHub repo description is set (use the PyPI one-liner)
 - [ ] Topics set: `ai-agents`, `self-improving`, `feedback-loop`, `python`, `llm`, `autonomous-agents`
-- [ ] CHANGELOG.md with 0.1.0 entry
+- [x] CHANGELOG.md with 0.1.1 entry
 - [ ] `tests/` passes (currently 40/40)
 - [ ] LICENSE file in repo root (MIT, already there)
 - [ ] Sanity-run: `python -c "from self_improving_loop import SelfImprovingLoop; SelfImprovingLoop()"`

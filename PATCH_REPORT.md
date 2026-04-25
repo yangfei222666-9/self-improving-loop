@@ -21,7 +21,7 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | Development status | `4 - Beta`. | `3 - Alpha`. | `pyproject.toml`. |
 | License metadata | `license = { file = "LICENSE" }` plus old license classifier. | `license = "MIT"` and removed superseded classifier. | Editable install initially failed until classifier was removed; now build passes. |
 | Package discovery | Hard-coded package list. | `tool.setuptools.packages.find` with `include = ["self_improving_loop*"]`. | Build includes `self_improving_loop.yijing` and CLI. |
-| CLI | No console script. | `self-improving-loop --version`. | Clean venv and wheel install both print `self-improving-loop 0.1.0`. |
+| CLI | No console script. | `self-improving-loop --version`. | Clean venv and wheel install both print the installed package version. |
 | Keywords/topics | PyPI keywords and GitHub topics could drift. | PyPI keywords expanded to include `ai-agents`, `rollback`, `autonomous-agents`. | `pyproject.toml`; existing GitHub topics already include the same core terms. |
 
 ## Extra high-ROI fixes
@@ -34,7 +34,7 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | Threshold clarity | Added `exec_count_24h` explanation and manual override pointer. |
 | Short API alias | Added `loop.track(...)` as an alias for `execute_with_improvement(...)`. |
 | HN operating checklist | Added first-24h comment-response checklist. |
-| Changelog | Added `CHANGELOG.md` with 0.1.0 entry. |
+| Changelog | Added `CHANGELOG.md` with 0.1.0 and 0.1.1 entries. |
 | Source package materials | Added `MANIFEST.in` so sdist includes `CHANGELOG.md` and repo examples. |
 
 ## Validation
@@ -45,7 +45,7 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | Test collection | `40 tests collected in 0.20s` |
 | Compile | `python3 -m compileall -q self_improving_loop examples` passed |
 | Editable install | `python3 -m pip install -e ".[dev]"` passed |
-| CLI | `self-improving-loop --version` prints `self-improving-loop 0.1.0` |
+| CLI | `self-improving-loop --version` prints the installed package version |
 | Clean venv install | `pip install -e .` passed; `pip freeze` showed only `self-improving-loop` |
 | Wheel install | Built wheel installed in a clean venv and imported `SelfImprovingLoop` + `YijingEvolutionStrategy` |
 | Build | `python -m build` produced both sdist and wheel |
@@ -56,12 +56,22 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | Check | Result |
 |---|---|
 | Isolated build tooling | Created a temporary venv and installed `build` + `twine`, because the host `python3` did not include `build`. |
-| Build artifacts | `self_improving_loop-0.1.0-py3-none-any.whl` and `self_improving_loop-0.1.0.tar.gz` generated under `/tmp/self_improving_loop_release_verify_20260425_192345/dist`. |
+| Build artifacts | `self_improving_loop-0.1.1-py3-none-any.whl` and `self_improving_loop-0.1.1.tar.gz` generated under `/tmp/self_improving_loop_release_verify_011_20260425_192922/dist`. |
 | Metadata validation | `twine check` passed for both wheel and sdist. |
-| Clean wheel install | Installed the wheel into `/tmp/self_improving_loop_install_verify_20260425_192424/venv`. |
-| Installed CLI | `self-improving-loop --version` printed `self-improving-loop 0.1.0`. |
+| Clean wheel install | Installed the wheel into `/tmp/self_improving_loop_install_verify_011_20260425_192949/venv`. |
+| Installed CLI | `self-improving-loop --version` printed `self-improving-loop 0.1.1`. |
 | Installed import/API | `SelfImprovingLoop(strategy=YijingEvolutionStrategy())` imported and executed successfully; installed object stores the hook as `improvement_strategy`. |
 | TestPyPI credentials | `TWINE_USERNAME`, `TWINE_PASSWORD`, `TWINE_REPOSITORY_URL`, `TEST_PYPI_API_TOKEN`, and `PYPI_TOKEN` were all missing, so remote TestPyPI upload remains blocked. |
+
+## Follow-up · PyPI version drift
+
+| Check | Result |
+|---|---|
+| Public PyPI | `self-improving-loop 0.1.0` already exists on PyPI. |
+| Public 0.1.0 install | Core import, `YijingEvolutionStrategy`, and `SQLiteTraceStore` import successfully, but the `self-improving-loop` console script is missing. |
+| Public 0.1.1 availability | `self-improving-loop 0.1.1` currently returns 404 on PyPI, so the version is available for the next publish. |
+| Release implication | Current release-ready state cannot reuse `0.1.0`, because PyPI versions are immutable. |
+| Version action | Bumped local package metadata and `__version__` to `0.1.1`; `0.1.1` is the next publishable package version. |
 
 ## Blocked / not executed
 
