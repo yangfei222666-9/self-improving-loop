@@ -49,6 +49,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | 2026-04-26 00:21 | GitHub | Baseline captured: 0 stars, 0 forks, 1 wheel download, 0 new post-release issues | This file | Created observation ledger | Capture X post URL |
 | 2026-04-26 00:28 | X | Canonical post captured: 10 views, 0 replies, 0 reposts, 0 likes | https://x.com/jiuxiao79/status/2048043783431021014 | Updated baseline metrics | Re-check at +6h / +24h |
 | 2026-04-26 00:28 | X | Launch copy drift: post says `42 tests`; release/CI copy uses `45 tests` | https://x.com/jiuxiao79/status/2048043783431021014 | Recorded drift; do not rewrite metrics from memory | Use `45 tests` in future copy |
+| 2026-04-26 02:19 | GitHub | Checkpoint: 0 stars, 0 forks, 0 watchers, 6 wheel downloads, 0 source downloads, latest CI success | `gh repo view`, `gh release view v0.1.1`, `gh run list` | Recorded early download movement; no positioning change | Re-check at +6h / +24h |
 
 ---
 
