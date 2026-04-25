@@ -1,0 +1,45 @@
+# self-improving-loop demo recording
+
+Recorded locally from real commands. This transcript is generated from command output, not hand-written.
+
+## Yijing strategy / 六爻状态机策略
+
+$ python3 examples/04_yijing_strategy.py
+[NORMAL] 🔧 Self-Improving Loop
+
+Agent: yijing-agent
+应用了 1 项自动改进
+
+时间: 2026-04-25 19:19:19
+yijing strategy ok
+hexagram: Kun / 坤
+policy_action: conserve_and_rollback_bias
+data dir: /tmp/sil_demo_yijing
+
+exit=0 elapsed=0.12s
+
+## Config rollback / 配置自动回滚
+
+$ python3 examples/02_config_rollback.py
+[NORMAL] 🔧 Self-Improving Loop
+
+Agent: rollback-demo-agent
+应用了 1 项自动改进
+
+时间: 2026-04-25 19:19:19
+[HIGH] ⚠️ 自动回滚告警
+
+Agent: rollback-demo-agent
+原因: 成功率下降 40.0% (从 50.0% 到 10.0%)
+
+指标对比:
+  • 成功率: 50.0% → 10.0%
+  • 平均耗时: 0.0s → 0.0s
+
+已自动回滚到上一个配置
+时间: 2026-04-25 19:19:19
+config rollback ok
+restore source: config_adapter
+data dir: /tmp/sil_demo_rollback
+
+exit=0 elapsed=0.10s

@@ -33,6 +33,10 @@ Wrap any function, get:
 
 Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji), where the same six-line state model is used for production-scale agent workloads.
 
+![self-improving-loop terminal demo](assets/demo/self_improving_loop_demo.svg)
+
+Demo artifacts: [terminal transcript](assets/demo/self_improving_loop_demo.txt) · [asciinema cast](assets/demo/self_improving_loop_demo.cast)
+
 ---
 
 ## Install

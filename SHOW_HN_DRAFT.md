@@ -116,7 +116,7 @@ notice with redistributed code.
 
 ## Pre-submission checklist
 
-- [ ] README has at least one screenshot or asciinema (ideally: a 30-second demo showing rollback firing)
+- [x] README has at least one screenshot/asciinema-style recording (`assets/demo/self_improving_loop_demo.svg` + `.cast` + `.txt`)
 - [ ] `pip install self-improving-loop` actually works from PyPI (upload wheel + sdist first)
 - [ ] TestPyPI dry-run works before production PyPI release
 - [ ] GitHub repo description is set (use the PyPI one-liner)

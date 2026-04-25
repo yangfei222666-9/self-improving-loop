@@ -56,7 +56,7 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | Item | Status |
 |---|---|
 | TestPyPI upload | Blocked: no `PYPI` / `TWINE` credentials are present in the environment, and no token was used from chat history. |
-| Demo GIF/asciinema | Not done in this patch; README now has stronger executable examples, but no recording artifact yet. |
+| Demo GIF/asciinema | Done as local demo artifacts: SVG terminal card, asciinema-compatible `.cast`, and transcript under `assets/demo/`. |
 | `LoopResult` dataclass | Not done. The current dict contract remains stable; changing result type before HN would be higher API risk than adding the safe `track()` alias. |
 
 ## Follow-up · Yijing positioning/API alignment
@@ -81,3 +81,10 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 |---|---|---|---|
 | Test framing | `tests/test_smoke.py` still described the suite as minimal and partially unported. | Updated the header to match current safety-path coverage. | `tests/test_smoke.py`. |
 | Restart persistence | SQLite trace and loop state persistence were implied but not explicitly asserted in restart-style tests. | Added assertions that SQLite traces and improvement backup state survive a new `SelfImprovingLoop` instance. | `tests/test_smoke.py`; test count remains `40`. |
+
+## Follow-up · demo recording
+
+| Item | Before | After | Evidence |
+|---|---|---|---|
+| README visual proof | README checklist asked for screenshot/asciinema, but no recording artifact existed. | Added a terminal SVG demo plus transcript and asciinema-compatible cast. | `assets/demo/self_improving_loop_demo.svg`, `.txt`, `.cast`; README embeds the SVG. |
+| Local path leakage | Raw command output included temp directories. | Demo artifacts use sanitized `/tmp/sil_demo_*` paths. | Sensitive-path grep is clean. |
