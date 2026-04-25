@@ -51,6 +51,18 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | Build | `python -m build` produced both sdist and wheel |
 | Twine | `twine check dist/*` passed |
 
+## Follow-up · local release verification
+
+| Check | Result |
+|---|---|
+| Isolated build tooling | Created a temporary venv and installed `build` + `twine`, because the host `python3` did not include `build`. |
+| Build artifacts | `self_improving_loop-0.1.0-py3-none-any.whl` and `self_improving_loop-0.1.0.tar.gz` generated under `/tmp/self_improving_loop_release_verify_20260425_192345/dist`. |
+| Metadata validation | `twine check` passed for both wheel and sdist. |
+| Clean wheel install | Installed the wheel into `/tmp/self_improving_loop_install_verify_20260425_192424/venv`. |
+| Installed CLI | `self-improving-loop --version` printed `self-improving-loop 0.1.0`. |
+| Installed import/API | `SelfImprovingLoop(strategy=YijingEvolutionStrategy())` imported and executed successfully; installed object stores the hook as `improvement_strategy`. |
+| TestPyPI credentials | `TWINE_USERNAME`, `TWINE_PASSWORD`, `TWINE_REPOSITORY_URL`, `TEST_PYPI_API_TOKEN`, and `PYPI_TOKEN` were all missing, so remote TestPyPI upload remains blocked. |
+
 ## Blocked / not executed
 
 | Item | Status |
