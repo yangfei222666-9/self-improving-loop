@@ -9,7 +9,7 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | Item | Before | After | Evidence |
 |---|---|---|---|
 | Overhead badge | Badge said generic `<1%` while README table says ~10 ms calls can be `+3.0%`. | Badge now says `LLM overhead <1%`, and README explicitly says to measure sub-10ms calls before wrapping. | README Performance section still preserves measured fixed-cost caveat. |
-| Test count | Show HN draft had stale `36/36` after adding CLI and alias tests. | Draft says `38/38`. | `python3 -m pytest --collect-only -q` reports `38 tests collected`; `python3 -m pytest -q` reports `38 passed`. |
+| Test count | Show HN draft had stale counts after adding CLI, alias, and Yijing entrypoint tests. | Draft says `40/40`. | `python3 -m pytest --collect-only -q` reports `40 tests collected`; `python3 -m pytest -q` reports `40 passed`. |
 | Ising hook | README wording implied this package itself survived the Ising experiment. | Wording now says it is extracted from TaijiOS, which includes the Ising experiment and production-scale workloads. | README top section changed. |
 | Hard-coded day count | Show HN draft and README had date deltas that age badly. | Copy now anchors on `Chinese New Year 2026-02-17` without hard-coded `60 days` deltas. | README Background and SHOW_HN_DRAFT body changed. |
 
@@ -41,8 +41,8 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 
 | Check | Result |
 |---|---|
-| Unit tests | `38 passed in 1.81s` |
-| Test collection | `38 tests collected in 0.06s` |
+| Unit tests | `40 passed in 2.55s` |
+| Test collection | `40 tests collected in 0.20s` |
 | Compile | `python3 -m compileall -q self_improving_loop examples` passed |
 | Editable install | `python3 -m pip install -e ".[dev]"` passed |
 | CLI | `self-improving-loop --version` prints `self-improving-loop 0.1.0` |
