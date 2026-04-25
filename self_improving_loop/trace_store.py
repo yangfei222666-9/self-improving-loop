@@ -221,14 +221,16 @@ class SQLiteTraceStore:
 
     def _init_db(self) -> None:
         with self._connect() as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS traces (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     agent_id TEXT,
                     timestamp TEXT,
                     payload TEXT NOT NULL
                 )
-                """)
+                """
+            )
             conn.execute("CREATE INDEX IF NOT EXISTS idx_traces_agent_id ON traces(agent_id)")
 
     def append(self, trace: Dict) -> None:
