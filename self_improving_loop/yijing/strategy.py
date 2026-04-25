@@ -25,7 +25,7 @@ class YijingEvolutionStrategy:
         self,
         agent_id: str,
         traces: Sequence[Mapping],
-        before_metrics: Mapping,
+        before_metrics: Mapping | None = None,
     ) -> Dict:
         lines = score_lines(
             traces,

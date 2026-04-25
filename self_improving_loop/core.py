@@ -349,7 +349,7 @@ class SelfImprovingLoop:
             return None
 
         # 判断是否需要回滚
-        before_metrics = backup_info["before_metrics"]
+        before_metrics = backup_info.get("before_metrics", {})
         should_rollback, reason = self.auto_rollback.should_rollback(
             agent_id,
             backup_info["improvement_id"],
@@ -365,6 +365,20 @@ class SelfImprovingLoop:
                 agent_id,
                 backup_info["backup_id"]
             )
+
+            if not result.get("success"):
+                error = result.get("error", "rollback failed without error detail")
+                self._log("error", f"rollback lookup/logging failed: {error}")
+                return {
+                    "agent_id": agent_id,
+                    "reason": reason,
+                    "before_metrics": before_metrics,
+                    "after_metrics": after_metrics,
+                    "backup_id": backup_info.get("backup_id"),
+                    "success": False,
+                    "restore_applied": False,
+                    "error": error,
+                }
 
             if result["success"]:
                 try:

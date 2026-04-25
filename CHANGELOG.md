@@ -7,6 +7,8 @@
 - Add bilingual launch copy for English and Chinese channels.
 - Add restart-persistence assertions for SQLite traces and loop state.
 - Add local release verification notes for wheel, sdist, CLI, and clean wheel install.
+- Report rollback lookup/logging failures explicitly instead of returning silent `None`.
+- Allow `YijingEvolutionStrategy.analyze(..., before_metrics=None)` for fresh agents.
 - Keep `0.1.0` immutable on PyPI; publish the current release-ready package as `0.1.1`.
 
 ## 0.1.0

@@ -257,6 +257,38 @@ def test_config_adapter_applies_and_restores_real_config(tmp_path: Path):
     assert adapter.config == {"mode": "baseline", "timeout_sec": 30}
 
 
+def test_check_and_rollback_reports_missing_backup_instead_of_silent_none(tmp_path: Path):
+    loop = SelfImprovingLoop(data_dir=str(tmp_path))
+    agent_id = "missing-backup-agent"
+    loop.state.setdefault("backups", {})[agent_id] = {
+        "backup_id": "does-not-exist",
+        "improvement_id": "improvement-missing-backup",
+        "before_metrics": {
+            "success_rate": 1.0,
+            "avg_duration_sec": 0.01,
+            "consecutive_failures": 0,
+            "total_tasks": 10,
+        },
+    }
+
+    for index in range(loop.auto_rollback.VERIFICATION_WINDOW):
+        loop._record_trace(
+            agent_id=agent_id,
+            task=f"regression-{index}",
+            success=False,
+            duration=0.01,
+            error="regression",
+            context=None,
+        )
+
+    rollback_result = loop.check_and_rollback(agent_id)
+
+    assert rollback_result is not None
+    assert rollback_result["success"] is False
+    assert rollback_result["restore_applied"] is False
+    assert "Backup not found" in rollback_result["error"]
+
+
 def test_execute_with_improvement_records_success(tmp_path: Path):
     loop = SelfImprovingLoop(data_dir=str(tmp_path))
     result = loop.execute_with_improvement(
@@ -377,6 +409,28 @@ def test_yijing_strategy_returns_bounded_policy_patch():
     assert patch["hexagram"]["name"] == "kun"
     assert patch["policy_action"] == "conserve_and_rollback_bias"
     assert patch["auto_apply_enabled"] is False
+    assert len(patch["dimensions"]) == 6
+
+
+def test_yijing_strategy_accepts_missing_before_metrics():
+    strategy = YijingEvolutionStrategy(latency_target_sec=1.0)
+    patch = strategy.analyze(
+        agent_id="fresh-agent",
+        traces=[
+            {
+                "agent_id": "fresh-agent",
+                "task": "first run",
+                "success": True,
+                "duration_sec": 0.2,
+                "timestamp": "2026-04-25T00:00:00",
+            }
+        ],
+        before_metrics=None,
+    )
+
+    assert patch["strategy_source"] == "yijing_hexagram_state_machine"
+    assert patch["agent_id"] == "fresh-agent"
+    assert "hexagram" in patch
     assert len(patch["dimensions"]) == 6
 
 
