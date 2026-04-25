@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "self-improving-loop"
 version = "0.1.0"
-description = "A safety-first self-improvement loop for AI agents: execute → track → analyze → auto-apply → auto-rollback on regression."
+description = "A safety-first self-improvement loop for AI agents: execute → track → analyze → strategy-apply → rollback on regression."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
 authors = [
-    { name = "Yang Fei", email = "yangfei222666@gmail.com" },
+    { name = "TaijiOS" },
 ]
 keywords = [
     "ai-agent",

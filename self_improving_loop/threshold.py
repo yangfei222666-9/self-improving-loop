@@ -26,6 +26,8 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, Tuple
 
+from .time_utils import parse_trace_timestamp
+
 
 class AdaptiveThreshold:
     """自适应阈值管理器"""
@@ -106,18 +108,9 @@ class AdaptiveThreshold:
         now = datetime.now()
         cutoff = now - timedelta(hours=24)
 
-        def _parse_ts(t):
-            raw = t.get("start_time") or t.get("timestamp")
-            if not raw:
-                return None
-            try:
-                return datetime.fromisoformat(raw)
-            except (ValueError, TypeError):
-                return None
-
         recent_tasks = [
             t for t in task_history
-            if (ts := _parse_ts(t)) is not None and ts > cutoff
+            if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
         ]
 
         tasks_per_day = len(recent_tasks)
@@ -209,7 +202,7 @@ class AdaptiveThreshold:
         cutoff = now - timedelta(hours=24)
         recent_tasks = [
             t for t in task_history
-            if datetime.fromisoformat(t.get("start_time", "")) > cutoff
+            if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
         ]
         tasks_per_day = len(recent_tasks)
 

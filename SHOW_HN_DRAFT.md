@@ -96,8 +96,8 @@ not overlapping.
 
 No. 0.1.0 uses statistical analysis (failure clustering by error
 string, frequency buckets). If you want LLM-authored config tweaks,
-subclass `SelfImprovingLoop._analyze_failure()` and call your model
-there. The base stays LLM-free.
+pass an `improvement_strategy` object and call your model inside its
+`analyze()` method. The base stays LLM-free.
 
 Happy to answer anything.
 ```

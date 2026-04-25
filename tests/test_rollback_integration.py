@@ -6,10 +6,11 @@ Covers GitHub issue #5:
   https://github.com/yangfei222666-9/self-improving-loop/issues/5
 """
 from pathlib import Path
+from datetime import datetime, timedelta
 
 import pytest
 
-from self_improving_loop import AutoRollback
+from self_improving_loop import AdaptiveThreshold, AutoRollback
 
 
 def test_success_rate_drop_triggers_rollback(tmp_path: Path):
@@ -158,3 +159,17 @@ def test_thresholds_are_documented_constants(tmp_path: Path):
     assert r.SUCCESS_RATE_DROP_THRESHOLD == 0.10
     assert r.LATENCY_INCREASE_THRESHOLD == 0.20
     assert r.CONSECUTIVE_FAILURES_THRESHOLD == 5
+
+
+def test_adaptive_threshold_profile_accepts_timestamp_only_traces(tmp_path: Path):
+    threshold = AdaptiveThreshold(str(tmp_path))
+    now = datetime.now()
+    history = [
+        {"timestamp": (now - timedelta(hours=i)).isoformat()}
+        for i in range(4)
+    ]
+
+    profile = threshold.get_agent_profile("timestamp-only-agent", history)
+
+    assert profile["tasks_per_day"] == 4
+    assert profile["frequency"] == "medium"

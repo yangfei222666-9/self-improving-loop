@@ -4,7 +4,9 @@ These are intentionally minimal; the full 17-test suite lives in the parent
 TaijiOS repo and is being ported here in follow-up PRs.
 """
 import json
+import multiprocessing
 import tempfile
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -16,6 +18,20 @@ from self_improving_loop import (
     TelegramNotifier,
     __version__,
 )
+from self_improving_loop.trace_store import JsonlTraceStore
+
+
+def _append_traces_worker(args):
+    traces_file, worker_id, count = args
+    store = JsonlTraceStore(traces_file)
+    for i in range(count):
+        store.append({
+            "agent_id": f"worker-{worker_id}",
+            "task": f"task-{i}",
+            "success": True,
+            "duration_sec": 0.0,
+            "timestamp": datetime.now().isoformat(),
+        })
 
 
 def test_version_is_set():
@@ -42,6 +58,45 @@ def test_loop_instantiates_with_tempdir(tmp_path: Path):
     assert loop.rollback is loop.auto_rollback
 
 
+def test_improvement_strategy_hook_applies_and_records_backup(tmp_path: Path):
+    class Strategy:
+        def __init__(self):
+            self.applied = []
+
+        def current_config(self, agent_id):
+            return {"timeout_sec": 30}
+
+        def analyze(self, agent_id, traces, before_metrics):
+            return {"timeout_sec": 45}
+
+        def apply(self, agent_id, config_patch):
+            self.applied.append((agent_id, config_patch))
+            return True
+
+    strategy = Strategy()
+    loop = SelfImprovingLoop(data_dir=str(tmp_path), improvement_strategy=strategy)
+    loop.adaptive_threshold.set_manual_threshold(
+        "strategy-agent",
+        failure_threshold=1,
+        analysis_window_hours=24,
+        cooldown_hours=0,
+    )
+
+    def bad():
+        raise ValueError("boom")
+
+    result = loop.execute_with_improvement(
+        agent_id="strategy-agent",
+        task="will trigger strategy",
+        execute_fn=bad,
+    )
+
+    assert result["improvement_triggered"] is True
+    assert result["improvement_applied"] == 1
+    assert strategy.applied == [("strategy-agent", {"timeout_sec": 45})]
+    assert "strategy-agent" in loop.state["backups"]
+
+
 def test_execute_with_improvement_records_success(tmp_path: Path):
     loop = SelfImprovingLoop(data_dir=str(tmp_path))
     result = loop.execute_with_improvement(
@@ -64,6 +119,38 @@ def test_execute_with_improvement_records_success(tmp_path: Path):
     row = json.loads(lines[0])
     assert row["agent_id"] == "smoke-agent"
     assert row["success"] is True
+
+
+def test_trace_store_process_safe_append(tmp_path: Path):
+    traces_file = tmp_path / "traces.jsonl"
+    workers = 4
+    per_worker = 20
+    ctx = multiprocessing.get_context("spawn")
+
+    with ctx.Pool(processes=workers) as pool:
+        pool.map(
+            _append_traces_worker,
+            [(str(traces_file), worker_id, per_worker) for worker_id in range(workers)],
+        )
+
+    rows = JsonlTraceStore(traces_file).load()
+    assert len(rows) == workers * per_worker
+    assert all(row["success"] is True for row in rows)
+
+
+def test_trace_store_skips_corrupt_jsonl_lines(tmp_path: Path):
+    traces_file = tmp_path / "traces.jsonl"
+    traces_file.write_text(
+        "\n".join([
+            '{"agent_id": "ok", "success": true, "timestamp": "2026-04-25T00:00:00"}',
+            "{not-json",
+            '{"agent_id": "ok", "success": false, "timestamp": "2026-04-25T00:00:01"}',
+        ]) + "\n",
+        encoding="utf-8",
+    )
+
+    rows = JsonlTraceStore(traces_file).load(agent_id="ok")
+    assert len(rows) == 2
 
 
 def test_execute_with_improvement_captures_failure(tmp_path: Path):

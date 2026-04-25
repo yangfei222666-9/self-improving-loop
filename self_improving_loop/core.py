@@ -13,6 +13,8 @@ from typing import Dict, Any, Callable, Optional
 from .rollback import AutoRollback
 from .threshold import AdaptiveThreshold
 from .notifier import TelegramNotifier
+from .time_utils import parse_trace_timestamp
+from .trace_store import JsonlTraceStore
 
 
 class SelfImprovingLoop:
@@ -22,6 +24,7 @@ class SelfImprovingLoop:
         self,
         data_dir: str = None,
         notifier: Optional[TelegramNotifier] = None,
+        improvement_strategy: Optional[Any] = None,
     ):
         """
         Args:
@@ -30,6 +33,11 @@ class SelfImprovingLoop:
             notifier: any subclass of TelegramNotifier (override
                 ``_send_message``) to route events to Slack / Discord /
                 email / etc. Defaults to a stdout-logging stub.
+            improvement_strategy: optional duck-typed strategy with
+                ``analyze(agent_id=..., traces=..., before_metrics=...)``,
+                ``apply(agent_id=..., config_patch=...)``, and optionally
+                ``rollback(agent_id=..., backup_config=...)``. Without it the
+                loop tracks and triggers, but does not pretend to mutate config.
         """
         if data_dir is None:
             data_dir = Path.home() / ".self-improving-loop" / "data"
@@ -40,6 +48,7 @@ class SelfImprovingLoop:
         self.auto_rollback = AutoRollback(str(self.data_dir))
         self.adaptive_threshold = AdaptiveThreshold(str(self.data_dir))
         self.notifier = notifier or TelegramNotifier(enabled=True)
+        self.improvement_strategy = improvement_strategy
         # alias for the README-facing name
         self.rollback = self.auto_rollback
 
@@ -47,6 +56,7 @@ class SelfImprovingLoop:
         self.state_file = self.data_dir / "loop_state.json"
         self.log_file = self.data_dir / "loop.log"
         self.traces_file = self.data_dir / "traces.jsonl"
+        self.trace_store = JsonlTraceStore(self.traces_file)
 
         # 加载状态
         self.state = self._load_state()
@@ -151,8 +161,7 @@ class SelfImprovingLoop:
             "timestamp": datetime.now().isoformat()
         }
 
-        with open(self.traces_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(trace, ensure_ascii=False) + "\n")
+        self.trace_store.append(trace)
 
     def _should_trigger_improvement(self, agent_id: str) -> bool:
         """判断是否应该触发改进循环（使用自适应阈值）"""
@@ -176,7 +185,7 @@ class SelfImprovingLoop:
         cutoff = datetime.now() - timedelta(hours=analysis_window_hours)
         recent_traces = [
             t for t in traces
-            if datetime.fromisoformat(t["timestamp"]) > cutoff
+            if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
         ]
 
         failures = [t for t in recent_traces if not t.get("success")]
@@ -188,19 +197,66 @@ class SelfImprovingLoop:
         return True
 
     def _run_improvement_cycle(self, agent_id: str) -> int:
-        """运行完整的改进循环（简化版）"""
+        """Run the improvement cycle via the optional strategy hook."""
         self._log("info", f"触发 Agent {agent_id} 的改进循环")
 
-        # 这里是简化版，实际应用中需要实现具体的改进逻辑
-        # 用户可以继承这个类并重写此方法
+        applied_count = 0
+        if self.improvement_strategy is None:
+            self._log("info", "未配置 improvement_strategy，仅记录触发，不伪装 strategy-apply")
+        else:
+            traces = self._load_traces(agent_id)
+            before_metrics = self._calculate_metrics(agent_id)
+            improvement_id = f"improvement_{int(time.time())}"
 
-        # 更新状态
+            try:
+                config_patch = self.improvement_strategy.analyze(
+                    agent_id=agent_id,
+                    traces=traces,
+                    before_metrics=before_metrics,
+                )
+            except Exception as e:
+                self._log("error", f"improvement_strategy.analyze 失败: {e}")
+                config_patch = None
+
+            if config_patch:
+                try:
+                    current_config_fn = getattr(
+                        self.improvement_strategy,
+                        "current_config",
+                        None,
+                    )
+                    current_config = (
+                        current_config_fn(agent_id=agent_id)
+                        if current_config_fn is not None
+                        else {}
+                    )
+                    backup_id = self.auto_rollback.backup_config(
+                        agent_id=agent_id,
+                        config=current_config,
+                        improvement_id=improvement_id,
+                    )
+
+                    applied = self.improvement_strategy.apply(
+                        agent_id=agent_id,
+                        config_patch=config_patch,
+                    )
+                    if applied is not False:
+                        applied_count = 1
+                        self.state.setdefault("backups", {})[agent_id] = {
+                            "backup_id": backup_id,
+                            "improvement_id": improvement_id,
+                            "before_metrics": before_metrics,
+                            "config_patch": config_patch,
+                        }
+                except Exception as e:
+                    self._log("error", f"improvement_strategy.apply 失败: {e}")
+
         if "last_improvement" not in self.state:
             self.state["last_improvement"] = {}
         self.state["last_improvement"][agent_id] = datetime.now().isoformat()
         self._save_state()
 
-        return 0  # 返回应用的改进数量
+        return applied_count
 
     def check_and_rollback(self, agent_id: str) -> Optional[Dict]:
         """检查是否需要回滚，如果需要则执行"""
@@ -235,6 +291,25 @@ class SelfImprovingLoop:
             )
 
             if result["success"]:
+                restore_fn = getattr(self.improvement_strategy, "rollback", None)
+                if restore_fn is not None:
+                    try:
+                        restore_fn(
+                            agent_id=agent_id,
+                            backup_config=result.get("config", {}),
+                        )
+                    except Exception as e:
+                        self._log("error", f"improvement_strategy.rollback 失败: {e}")
+                        return {
+                            "agent_id": agent_id,
+                            "reason": reason,
+                            "before_metrics": before_metrics,
+                            "after_metrics": after_metrics,
+                            "backup_id": backup_info["backup_id"],
+                            "success": False,
+                            "error": str(e),
+                        }
+
                 self._log("success", f"回滚成功: {agent_id}")
 
                 # 清除备份信息
@@ -262,7 +337,7 @@ class SelfImprovingLoop:
         cutoff = datetime.now() - timedelta(hours=analysis_window_hours)
         recent_traces = [
             t for t in traces
-            if datetime.fromisoformat(t["timestamp"]) > cutoff
+            if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
         ]
 
         if not recent_traces:
@@ -297,18 +372,7 @@ class SelfImprovingLoop:
 
     def _load_traces(self, agent_id: str = None) -> list:
         """加载追踪记录"""
-        if not self.traces_file.exists():
-            return []
-
-        traces = []
-        with open(self.traces_file, "r", encoding="utf-8") as f:
-            for line in f:
-                if line.strip():
-                    trace = json.loads(line)
-                    if agent_id is None or trace.get("agent_id") == agent_id:
-                        traces.append(trace)
-
-        return traces
+        return self.trace_store.load(agent_id=agent_id)
 
     def get_improvement_stats(self, agent_id: str = None) -> Dict:
         """获取改进统计"""

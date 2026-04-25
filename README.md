@@ -1,7 +1,7 @@
 # self-improving-loop
 
 > A safety-first self-improvement loop for AI agents:
-> **execute → track → analyze → auto-apply → auto-rollback on regression.**
+> **execute → track → analyze → strategy-apply → rollback on regression.**
 
 [![PyPI](https://img.shields.io/badge/pypi-0.1.0-blue.svg)](https://pypi.org/project/self-improving-loop/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -14,8 +14,8 @@ Wrap any function, get:
 
 - 📊 **Automatic execution tracking** (success rate, latency, rolling window)
 - 🧠 **Adaptive thresholds** per agent profile (high-freq / mid-freq / low-freq / critical)
-- 🛠 **Auto-apply** improvement configs when failure pattern detected
-- 🛡 **Auto-rollback** when the new config regresses (>10% success drop, >20% latency gain, or 5 consecutive failures)
+- 🛠 **Strategy hook** for applying improvement configs when failure patterns are detected
+- 🛡 **Rollback trigger** when the new config regresses (>10% success drop, >20% latency gain, or 5 consecutive failures)
 - 📬 **Pluggable notifier** (stub by default — swap in Telegram / Slack / whatever)
 
 Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/TaijiOS), where it survived a 346-heartbeat Ising physics experiment and production-scale agent workloads.
@@ -50,13 +50,41 @@ result = loop.execute_with_improvement(
 )
 
 if result["improvement_triggered"]:
-    print(f"Applied {result['improvement_applied']} config tweaks")
+    print(f"Strategy applied {result['improvement_applied']} config tweaks")
 
 if result["rollback_executed"]:
     print(f"Rolled back because: {result['rollback_executed']['reason']}")
 ```
 
-That's it. The loop silently watches every execution, decides when to tune, and undoes tunings that made things worse.
+That's it. The loop watches every execution, decides when to trigger tuning, and can undo tunings that made things worse when you provide a strategy hook.
+
+---
+
+## Prove rollback in one command
+
+Run the end-to-end safety demo:
+
+```bash
+python examples/regression_rollback_demo.py
+```
+
+Expected evidence:
+
+```text
+baseline pass
+failure detected
+improvement proposed
+backup created
+patch applied
+quality worse
+rollback executed
+final status recovered
+event trail written: /tmp/.../regression_rollback_event_trail.jsonl
+```
+
+The demo intentionally applies a bad patch via an `improvement_strategy`, then
+proves the runtime can restore the prior config and write an auditable event
+trail. It is not a mocked success path.
 
 ---
 
@@ -83,9 +111,9 @@ Different agents have different "pulse rates". A critical alerting agent should 
 
 | Agent profile | Failure trigger | Analysis window | Cooldown |
 |---|---|---|---|
-| High-frequency (>100/day) | 5 failures | 48h | 3h |
-| Medium-frequency (10-100/day) | 3 failures | 24h | 6h |
-| Low-frequency (<10/day) | 2 failures | 72h | 12h |
+| High-frequency (>10/day) | 5 failures | 48h | 3h |
+| Medium-frequency (3-10/day) | 3 failures | 24h | 6h |
+| Low-frequency (<3/day) | 2 failures | 72h | 12h |
 | Critical (user-marked) | 1 failure | 24h | 6h |
 
 Or bypass the classifier and set manually:
@@ -175,7 +203,7 @@ Separate operation costs (triggered occasionally, not per-call):
 
 - **...methodology doc.** Many "self-improving agent" repos are markdown templates that ask *you* to log learnings to `CLAUDE.md`. This is the runtime loop that does it for you.
 - **...heavyweight framework.** 1,170 LoC of stdlib. Drop it next to your existing code. No decorators forced on you. No background process.
-- **...LLM-dependent.** The analysis is statistical, not LLM-based. If you want LLM-authored config tweaks, subclass `SelfImprovingLoop._analyze_failure()` and ask your favorite LLM there.
+- **...LLM-dependent.** The analysis is statistical, not LLM-based. If you want LLM-authored config tweaks, pass an `improvement_strategy` object and ask your favorite LLM inside its `analyze()` method.
 
 ---
 
@@ -183,7 +211,7 @@ Separate operation costs (triggered occasionally, not per-call):
 
 Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/TaijiOS) — a self-learning AI operating system with 5 *I Ching*–bound engines and a 346-heartbeat Ising physics experiment. The parent project has 14 modules; this one is the most generally reusable, so it lives as a standalone package.
 
-The author is a non-CS-background former-entrepreneur who built TaijiOS via multi-AI collaboration starting on **Chinese New Year 2026-02-17** (60 days before this release).
+TaijiOS was built through multi-AI collaboration starting on **Chinese New Year 2026-02-17** (60 days before this release).
 
 ---
 
@@ -195,8 +223,6 @@ MIT. Ship it wherever.
 
 This is a very early release. Every bug report, every "didn't work for me", every "I wish it did X" is read:
 
-- **Email (preferred):** `yangfei222666@gmail.com`
-- WeChat (secondary): `yf529486`
 - GitHub Issue: [open one](https://github.com/yangfei222666-9/self-improving-loop/issues/new)
 - Parent project: [TaijiOS](https://github.com/yangfei222666-9/TaijiOS)
 
