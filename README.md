@@ -9,6 +9,8 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![LLM overhead](https://img.shields.io/badge/LLM%20overhead-%3C1%25-brightgreen)](#performance)
 
+Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md)
+
 Most "self-improving agent" projects stop at *"log the failures, let the next run read the log"*. That's a methodology, not a loop. **This package is the loop, implemented as a compact pure-stdlib Python runtime** — no framework lock-in, no LLM dependency, no cloud.
 
 The differentiator is the optional Yijing strategy: runtime signals are mapped

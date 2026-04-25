@@ -67,3 +67,10 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | Constructor API | Only `improvement_strategy=` was documented as the strategy hook. | Added preferred `strategy=` alias while keeping `improvement_strategy=` compatible. | `tests/test_smoke.py::test_strategy_alias_is_preferred_entrypoint`. |
 | Duplicate strategy args | Passing both names was ambiguous. | Raises `ValueError`. | `tests/test_smoke.py::test_strategy_alias_rejects_duplicate_strategy_args`. |
 | Yijing example | Used legacy `improvement_strategy=`. | Uses `strategy=YijingEvolutionStrategy(...)`. | `examples/04_yijing_strategy.py`. |
+
+## Follow-up · bilingual launch material
+
+| Item | Before | After | Evidence |
+|---|---|---|---|
+| Chinese launch copy | No dedicated Chinese or bilingual material. | Added `LAUNCH_COPY_BILINGUAL.md` with English and Chinese positioning, demo script, short posts, HN boundary, safe claims, and claims to avoid. | README links to `LAUNCH_COPY_BILINGUAL.md`. |
+| Overclaim guard | Launch wording could drift between English and Chinese channels. | Both languages explicitly say the Yijing layer is experimental, deterministic, and not full 64-hexagram coverage yet. | `LAUNCH_COPY_BILINGUAL.md` sections 6 and 7. |
