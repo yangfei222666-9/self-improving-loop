@@ -14,11 +14,11 @@ Check: https://news.ycombinator.com/show — make sure no near-identical "self-i
 
 Candidates, ranked:
 
-1. **`Show HN: Self-improving-loop – 1170 lines of stdlib Python for AI agent self-healing`**  *(77 chars, specific, anti-bloat)*
-2. `Show HN: Self-improving-loop – auto-rollback when your AI agent regresses`  *(76 chars, outcome-focused)*
-3. `Show HN: A pure-stdlib self-improving feedback loop for AI agents`  *(66 chars, shortest)*
+1. **`Show HN: self-improving-loop – auto-rollback when your AI agent regresses`**  *(76 chars, outcome-focused)*
+2. `Show HN: A pure-stdlib rollback guard for AI agents`  *(54 chars, shortest)*
+3. `Show HN: self-improving-loop – reliability layer for AI agents`  *(67 chars, broader)*
 
-Pick #1 — the "1170 lines of stdlib" hook is HN-bait in a good way (anti-bloat, factual, falsifiable).
+Pick #1 — the rollback outcome is clearer than a line-count hook and does not become stale after implementation work.
 
 ---
 
@@ -47,7 +47,7 @@ latency increase, or 5 consecutive failures).
 Things I wanted it to be:
 
   - pure stdlib — you can drop it into any project without pulling in a
-    framework. Zero runtime dependencies. It's 1170 lines.
+    framework. Zero runtime dependencies. It's about 2k lines.
   - opinion-free on where events go — the built-in TelegramNotifier is a
     stub that logs to stdout; subclass _send_message for Slack, Discord,
     email, etc.
@@ -60,7 +60,7 @@ building solo for 60 days with heavy AI-collab). This piece felt general
 enough to spin out.
 
 Honest caveats:
-  - 0.1.0. Smoke-tested (29 tests), but real-world battle testing is
+  - 0.1.0. Smoke-tested (36 tests), but real-world battle testing is
     ongoing. Bug reports very welcome.
   - The analysis_failure() step is statistical, not LLM-based. If you want
     LLM-authored config tweaks, subclass it.
@@ -106,13 +106,12 @@ Happy to answer anything.
 
 ## Pre-submission checklist
 
-- [ ] Repo has ≥5 GitHub stars (HN auto-flags very fresh / 0-star repos as low-quality)
 - [ ] README has at least one screenshot or asciinema (ideally: a 30-second demo showing rollback firing)
 - [ ] `pip install self-improving-loop` actually works from PyPI (upload wheel + sdist first)
 - [ ] GitHub repo description is set (use the PyPI one-liner)
 - [ ] Topics set: `ai-agents`, `self-improving`, `feedback-loop`, `python`, `llm`, `autonomous-agents`
 - [ ] CHANGELOG.md with 0.1.0 entry
-- [ ] `tests/` passes (currently 11/11)
+- [ ] `tests/` passes (currently 36/36)
 - [ ] LICENSE file in repo root (MIT, already there)
 - [ ] Sanity-run: `python -c "from self_improving_loop import SelfImprovingLoop; SelfImprovingLoop()"`
 
