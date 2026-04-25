@@ -62,8 +62,8 @@ class JsonlTraceStore:
         self.path = Path(path)
         self.lock_path = self.path.with_suffix(self.path.suffix + ".lock")
         self.max_bytes = max_bytes
-        self.archive_dir = Path(archive_dir) if archive_dir is not None else (
-            self.path.parent / "trace_archives"
+        self.archive_dir = (
+            Path(archive_dir) if archive_dir is not None else (self.path.parent / "trace_archives")
         )
         self.max_archives = max_archives
 
@@ -174,9 +174,7 @@ class JsonlTraceStore:
     def _rotate_if_needed_unlocked(self, force: bool = False) -> Optional[Path]:
         if not self.path.exists() or self.path.stat().st_size == 0:
             return None
-        if not force and (
-            self.max_bytes is None or self.path.stat().st_size <= self.max_bytes
-        ):
+        if not force and (self.max_bytes is None or self.path.stat().st_size <= self.max_bytes):
             return None
 
         archive_path = self._rotation_archive_path_unlocked()
@@ -197,7 +195,7 @@ class JsonlTraceStore:
             key=lambda p: (p.stat().st_mtime_ns, p.name),
             reverse=True,
         )
-        for archive in archives[self.max_archives:]:
+        for archive in archives[self.max_archives :]:
             archive.unlink()
 
 
@@ -223,19 +221,15 @@ class SQLiteTraceStore:
 
     def _init_db(self) -> None:
         with self._connect() as conn:
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS traces (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     agent_id TEXT,
                     timestamp TEXT,
                     payload TEXT NOT NULL
                 )
-                """
-            )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_traces_agent_id ON traces(agent_id)"
-            )
+                """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_traces_agent_id ON traces(agent_id)")
 
     def append(self, trace: Dict) -> None:
         """Append a trace under SQLite's transactional write lock."""

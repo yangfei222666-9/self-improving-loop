@@ -20,7 +20,6 @@ sys.path.insert(0, str(ROOT))
 
 from self_improving_loop import SelfImprovingLoop
 
-
 AGENT_ID = "rollback-demo-agent"
 
 
@@ -75,11 +74,14 @@ def main() -> int:
         return {"status": "ok", "config": dict(adapter.config)}
 
     # Establish baseline.
-    assert loop.execute_with_improvement(
-        agent_id=AGENT_ID,
-        task="baseline",
-        execute_fn=agent_call,
-    )["success"] is True
+    assert (
+        loop.execute_with_improvement(
+            agent_id=AGENT_ID,
+            task="baseline",
+            execute_fn=agent_call,
+        )["success"]
+        is True
+    )
 
     # Seed one failure. This triggers the bad patch and creates a backup.
     seed = loop.execute_with_improvement(

@@ -11,7 +11,6 @@ from typing import Dict
 
 from .hexagram import HexagramState
 
-
 CORE_POLICIES: Dict[str, Dict] = {
     "qian": {
         "policy_action": "canary_explore",

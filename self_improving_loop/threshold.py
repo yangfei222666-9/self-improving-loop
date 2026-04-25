@@ -22,8 +22,8 @@ Adaptive Threshold - 自适应阈值
 """
 
 import json
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Dict, Tuple
 
 from .time_utils import parse_trace_timestamp
@@ -39,14 +39,14 @@ class AdaptiveThreshold:
 
     # 任务频率分类（次/天）
     HIGH_FREQUENCY_THRESHOLD = 10  # >10 次/天
-    LOW_FREQUENCY_THRESHOLD = 3    # <3 次/天
+    LOW_FREQUENCY_THRESHOLD = 3  # <3 次/天
 
     def __init__(self, data_dir: str = None):
         if data_dir is None:
             data_dir = Path.home() / ".self-improving-loop"
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.config_file = self.data_dir / "adaptive_thresholds.json"
         self.config = self._load_config()
 
@@ -67,7 +67,7 @@ class AdaptiveThreshold:
             return (
                 manual_config.get("failure_threshold", self.DEFAULT_FAILURE_THRESHOLD),
                 manual_config.get("analysis_window_hours", self.DEFAULT_ANALYSIS_WINDOW_HOURS),
-                manual_config.get("cooldown_hours", self.DEFAULT_COOLDOWN_HOURS)
+                manual_config.get("cooldown_hours", self.DEFAULT_COOLDOWN_HOURS),
             )
 
         # 自动计算
@@ -91,7 +91,7 @@ class AdaptiveThreshold:
             return (
                 self.DEFAULT_FAILURE_THRESHOLD,
                 self.DEFAULT_ANALYSIS_WINDOW_HOURS,
-                self.DEFAULT_COOLDOWN_HOURS
+                self.DEFAULT_COOLDOWN_HOURS,
             )
 
     def _calculate_frequency(self, task_history: list) -> str:
@@ -109,8 +109,7 @@ class AdaptiveThreshold:
         cutoff = now - timedelta(hours=24)
 
         recent_tasks = [
-            t for t in task_history
-            if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
+            t for t in task_history if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
         ]
 
         tasks_per_day = len(recent_tasks)
@@ -148,7 +147,7 @@ class AdaptiveThreshold:
         failure_threshold: int = None,
         analysis_window_hours: int = None,
         cooldown_hours: int = None,
-        is_critical: bool = None
+        is_critical: bool = None,
     ):
         """
         手动设置 Agent 阈值
@@ -201,8 +200,7 @@ class AdaptiveThreshold:
         now = datetime.now()
         cutoff = now - timedelta(hours=24)
         recent_tasks = [
-            t for t in task_history
-            if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
+            t for t in task_history if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
         ]
         tasks_per_day = len(recent_tasks)
 
@@ -214,7 +212,7 @@ class AdaptiveThreshold:
             "analysis_window_hours": window,
             "cooldown_hours": cooldown,
             "tasks_per_day": tasks_per_day,
-            "source": "manual" if agent_id in self.config else "auto"
+            "source": "manual" if agent_id in self.config else "auto",
         }
 
     def _load_config(self) -> Dict:
@@ -235,6 +233,7 @@ class AdaptiveThreshold:
 # 使用示例
 # ============================================================================
 
+
 def example_usage():
     """使用示例"""
     adaptive = AdaptiveThreshold()
@@ -243,10 +242,7 @@ def example_usage():
     now = datetime.now()
 
     # 1. 高频 Agent（15 次/天）
-    high_freq_history = [
-        {"start_time": (now - timedelta(hours=i)).isoformat()}
-        for i in range(15)
-    ]
+    high_freq_history = [{"start_time": (now - timedelta(hours=i)).isoformat()} for i in range(15)]
 
     threshold, window, cooldown = adaptive.get_threshold("agent-high-freq", high_freq_history)
     print(f"高频 Agent:")
@@ -256,8 +252,7 @@ def example_usage():
 
     # 2. 低频 Agent（2 次/天）
     low_freq_history = [
-        {"start_time": (now - timedelta(hours=i*12)).isoformat()}
-        for i in range(2)
+        {"start_time": (now - timedelta(hours=i * 12)).isoformat()} for i in range(2)
     ]
 
     threshold, window, cooldown = adaptive.get_threshold("agent-low-freq", low_freq_history)
@@ -279,7 +274,7 @@ def example_usage():
         failure_threshold=10,
         analysis_window_hours=12,
         cooldown_hours=1,
-        is_critical=True
+        is_critical=True,
     )
 
     threshold, window, cooldown = adaptive.get_threshold("agent-custom", [])

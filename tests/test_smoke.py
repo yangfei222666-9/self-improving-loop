@@ -3,42 +3,44 @@
 These tests cover import/install health, trace persistence, strategy patching,
 real config rollback, and the optional Yijing policy router.
 """
-import json
+
 import gzip
-import multiprocessing
+import json
 import logging
-import tempfile
+import multiprocessing
 from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
 
 from self_improving_loop import (
-    SelfImprovingLoop,
-    AutoRollback,
     AdaptiveThreshold,
+    AutoRollback,
     ConfigAdapter,
     JsonlTraceStore,
+    SelfImprovingLoop,
     SQLiteTraceStore,
     TelegramNotifier,
     YijingEvolutionStrategy,
     __version__,
 )
-from self_improving_loop.yijing import identify_hexagram, score_lines
 from self_improving_loop.notifier import _encode_for_stdout
+from self_improving_loop.yijing import identify_hexagram, score_lines
 
 
 def _append_traces_worker(args):
     traces_file, worker_id, count = args
     store = JsonlTraceStore(traces_file)
     for i in range(count):
-        store.append({
-            "agent_id": f"worker-{worker_id}",
-            "task": f"task-{i}",
-            "success": True,
-            "duration_sec": 0.0,
-            "timestamp": datetime.now().isoformat(),
-        })
+        store.append(
+            {
+                "agent_id": f"worker-{worker_id}",
+                "task": f"task-{i}",
+                "success": True,
+                "duration_sec": 0.0,
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
 
 
 def test_version_is_set():
@@ -375,13 +377,18 @@ def test_loop_init_does_not_eager_load_trace_history(tmp_path: Path, monkeypatch
     traces_file.parent.mkdir(parents=True, exist_ok=True)
     with open(traces_file, "w", encoding="utf-8") as f:
         for index in range(1000):
-            f.write(json.dumps({
-                "agent_id": "large-restart-agent",
-                "task": f"task-{index}",
-                "success": True,
-                "duration_sec": 0.01,
-                "timestamp": "2026-04-26T00:00:00",
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "agent_id": "large-restart-agent",
+                        "task": f"task-{index}",
+                        "success": True,
+                        "duration_sec": 0.01,
+                        "timestamp": "2026-04-26T00:00:00",
+                    }
+                )
+                + "\n"
+            )
 
     def fail_if_loaded(*args, **kwargs):
         raise AssertionError("SelfImprovingLoop.__init__ must not eager-load traces")
@@ -577,15 +584,17 @@ def test_check_and_rollback_counts_only_post_improvement_traces(tmp_path: Path):
 
     old_timestamp = (improved_at - timedelta(minutes=5)).isoformat()
     for index in range(loop.auto_rollback.VERIFICATION_WINDOW):
-        loop.trace_store.append({
-            "agent_id": agent_id,
-            "task": f"old-regression-{index}",
-            "success": False,
-            "duration_sec": 0.01,
-            "error": "old failure before improvement",
-            "context": {},
-            "timestamp": old_timestamp,
-        })
+        loop.trace_store.append(
+            {
+                "agent_id": agent_id,
+                "task": f"old-regression-{index}",
+                "success": False,
+                "duration_sec": 0.01,
+                "error": "old failure before improvement",
+                "context": {},
+                "timestamp": old_timestamp,
+            }
+        )
 
     assert loop.check_and_rollback(agent_id) is None
 
@@ -634,11 +643,14 @@ def test_trace_store_process_safe_append(tmp_path: Path):
 def test_trace_store_skips_corrupt_jsonl_lines(tmp_path: Path):
     traces_file = tmp_path / "traces.jsonl"
     traces_file.write_text(
-        "\n".join([
-            '{"agent_id": "ok", "success": true, "timestamp": "2026-04-25T00:00:00"}',
-            "{not-json",
-            '{"agent_id": "ok", "success": false, "timestamp": "2026-04-25T00:00:01"}',
-        ]) + "\n",
+        "\n".join(
+            [
+                '{"agent_id": "ok", "success": true, "timestamp": "2026-04-25T00:00:00"}',
+                "{not-json",
+                '{"agent_id": "ok", "success": false, "timestamp": "2026-04-25T00:00:01"}',
+            ]
+        )
+        + "\n",
         encoding="utf-8",
     )
 
@@ -651,18 +663,22 @@ def test_jsonl_trace_store_rotates_by_size(tmp_path: Path):
     archive_dir = tmp_path / "archives"
     store = JsonlTraceStore(traces_file, max_bytes=1, archive_dir=archive_dir)
 
-    store.append({
-        "agent_id": "rotating-agent",
-        "task": "first",
-        "success": True,
-        "timestamp": "2026-04-25T00:00:00",
-    })
-    store.append({
-        "agent_id": "rotating-agent",
-        "task": "second",
-        "success": True,
-        "timestamp": "2026-04-25T00:00:01",
-    })
+    store.append(
+        {
+            "agent_id": "rotating-agent",
+            "task": "first",
+            "success": True,
+            "timestamp": "2026-04-25T00:00:00",
+        }
+    )
+    store.append(
+        {
+            "agent_id": "rotating-agent",
+            "task": "second",
+            "success": True,
+            "timestamp": "2026-04-25T00:00:01",
+        }
+    )
 
     archives = sorted(archive_dir.glob("*.gz"))
     assert len(archives) == 1
@@ -684,12 +700,14 @@ def test_jsonl_trace_store_prunes_old_archives(tmp_path: Path):
     )
 
     for i in range(3):
-        store.append({
-            "agent_id": "prune-agent",
-            "task": f"task-{i}",
-            "success": True,
-            "timestamp": f"2026-04-25T00:00:0{i}",
-        })
+        store.append(
+            {
+                "agent_id": "prune-agent",
+                "task": f"task-{i}",
+                "success": True,
+                "timestamp": f"2026-04-25T00:00:0{i}",
+            }
+        )
 
     archives = sorted(archive_dir.glob("*.gz"))
     assert len(archives) == 1
@@ -704,12 +722,14 @@ def test_jsonl_trace_store_compacts_to_latest_entries(tmp_path: Path):
     traces_file = tmp_path / "traces.jsonl"
     store = JsonlTraceStore(traces_file)
     for i in range(5):
-        store.append({
-            "agent_id": "compact-agent",
-            "task": f"task-{i}",
-            "success": True,
-            "timestamp": f"2026-04-25T00:00:0{i}",
-        })
+        store.append(
+            {
+                "agent_id": "compact-agent",
+                "task": f"task-{i}",
+                "success": True,
+                "timestamp": f"2026-04-25T00:00:0{i}",
+            }
+        )
 
     removed = store.compact(max_entries=2)
 
@@ -777,34 +797,41 @@ def test_loop_logging_propagates_to_stdlib_handlers(tmp_path: Path):
 def test_sqlite_trace_store_round_trip_and_agent_filter(tmp_path: Path):
     db_path = tmp_path / "traces.sqlite3"
     store = SQLiteTraceStore(db_path)
-    store.append({
-        "agent_id": "a",
-        "task": "first",
-        "success": True,
-        "timestamp": "2026-04-25T00:00:00",
-    })
-    store.append({
-        "agent_id": "b",
-        "task": "second",
-        "success": False,
-        "timestamp": "2026-04-25T00:00:01",
-    })
+    store.append(
+        {
+            "agent_id": "a",
+            "task": "first",
+            "success": True,
+            "timestamp": "2026-04-25T00:00:00",
+        }
+    )
+    store.append(
+        {
+            "agent_id": "b",
+            "task": "second",
+            "success": False,
+            "timestamp": "2026-04-25T00:00:01",
+        }
+    )
 
     assert [row["task"] for row in store.load()] == ["first", "second"]
     assert [row["task"] for row in store.load(agent_id="b")] == ["second"]
 
 
 def test_yijing_identifies_core_hexagram_from_six_lines():
-    lines = score_lines([
-        {
-            "agent_id": "strong",
-            "task": "ok",
-            "success": True,
-            "duration_sec": 0.01,
-            "timestamp": "2026-04-25T00:00:00",
-        }
-        for _ in range(4)
-    ], {"success_rate": 1.0, "avg_duration_sec": 0.01, "consecutive_failures": 0})
+    lines = score_lines(
+        [
+            {
+                "agent_id": "strong",
+                "task": "ok",
+                "success": True,
+                "duration_sec": 0.01,
+                "timestamp": "2026-04-25T00:00:00",
+            }
+            for _ in range(4)
+        ],
+        {"success_rate": 1.0, "avg_duration_sec": 0.01, "consecutive_failures": 0},
+    )
     state = identify_hexagram(lines)
     assert state.binary == "111111"
     assert state.name == "qian"
@@ -812,32 +839,36 @@ def test_yijing_identifies_core_hexagram_from_six_lines():
 
 
 def test_yijing_hexagram_requires_exactly_six_lines():
-    lines = score_lines([
-        {
-            "agent_id": "short",
-            "task": "ok",
-            "success": True,
-            "duration_sec": 0.01,
-            "timestamp": "2026-04-25T00:00:00",
-        }
-        for _ in range(4)
-    ])
+    lines = score_lines(
+        [
+            {
+                "agent_id": "short",
+                "task": "ok",
+                "success": True,
+                "duration_sec": 0.01,
+                "timestamp": "2026-04-25T00:00:00",
+            }
+            for _ in range(4)
+        ]
+    )
 
     with pytest.raises(ValueError, match="exactly 6 lines"):
         identify_hexagram(lines[:5])
 
 
 def test_yijing_hexagram_rejects_duplicate_or_missing_positions():
-    lines = score_lines([
-        {
-            "agent_id": "bad-positions",
-            "task": "ok",
-            "success": True,
-            "duration_sec": 0.01,
-            "timestamp": "2026-04-25T00:00:00",
-        }
-        for _ in range(4)
-    ])
+    lines = score_lines(
+        [
+            {
+                "agent_id": "bad-positions",
+                "task": "ok",
+                "success": True,
+                "duration_sec": 0.01,
+                "timestamp": "2026-04-25T00:00:00",
+            }
+            for _ in range(4)
+        ]
+    )
     corrupted = list(lines)
     corrupted[5] = corrupted[4]
 
@@ -948,9 +979,7 @@ def test_manual_threshold_overrides_adaptive(tmp_path: Path):
 def test_notifier_default_is_noninvasive(capsys, tmp_path: Path):
     # Default stub should never raise and should be replaceable.
     loop = SelfImprovingLoop(data_dir=str(tmp_path))
-    loop.notifier.notify_improvement(
-        agent_id="x", improvements_applied=1, details={"k": "v"}
-    )
+    loop.notifier.notify_improvement(agent_id="x", improvements_applied=1, details={"k": "v"})
     # stub prints to stdout; we just assert it didn't crash
     captured = capsys.readouterr()
     assert "x" in captured.out or captured.out == ""  # either format is fine
@@ -970,9 +999,7 @@ def test_custom_notifier_subclass_is_honored(tmp_path: Path):
             received.append((priority, message))
 
     loop = SelfImprovingLoop(data_dir=str(tmp_path), notifier=MyNotifier())
-    loop.notifier.notify_improvement(
-        agent_id="custom", improvements_applied=2, details=None
-    )
+    loop.notifier.notify_improvement(agent_id="custom", improvements_applied=2, details=None)
     assert len(received) == 1
     priority, message = received[0]
     assert priority in ("normal", "high")

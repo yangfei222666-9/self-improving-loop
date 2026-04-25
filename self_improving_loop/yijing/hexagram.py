@@ -7,17 +7,16 @@ from typing import Dict, Sequence
 
 from .lines import LineSignal
 
-
 # Binary strings are bottom -> top, matching the line order in lines.py.
 CORE_HEXAGRAMS: Dict[str, str] = {
-    "111111": "qian",      # 乾
-    "000000": "kun",       # 坤
-    "100100": "zhen",      # 震
-    "010010": "kan",       # 坎
-    "000001": "bo",        # 剥
-    "100000": "fu",        # 复
-    "101010": "jiji",      # 既济
-    "010101": "weiji",     # 未济
+    "111111": "qian",  # 乾
+    "000000": "kun",  # 坤
+    "100100": "zhen",  # 震
+    "010010": "kan",  # 坎
+    "000001": "bo",  # 剥
+    "100000": "fu",  # 复
+    "101010": "jiji",  # 既济
+    "010101": "weiji",  # 未济
 }
 
 DISPLAY_NAMES: Dict[str, str] = {

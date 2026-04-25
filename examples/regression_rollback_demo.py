@@ -12,15 +12,14 @@ event trail written.
 from __future__ import annotations
 
 import json
-import tempfile
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from self_improving_loop import SelfImprovingLoop
-
 
 AGENT_ID = "support-agent-demo"
 
@@ -38,20 +37,24 @@ class BadPatchStrategy:
         self._already_proposed = False
 
     def current_config(self, agent_id: str) -> dict:
-        self.events.append({
-            "event": "current_config",
-            "agent_id": agent_id,
-            "config": dict(self.config),
-        })
+        self.events.append(
+            {
+                "event": "current_config",
+                "agent_id": agent_id,
+                "config": dict(self.config),
+            }
+        )
         return dict(self.config)
 
     def analyze(self, agent_id: str, traces: list[dict], before_metrics: dict) -> dict | None:
         if self._already_proposed:
-            self.events.append({
-                "event": "improvement_skipped",
-                "agent_id": agent_id,
-                "reason": "one_patch_demo_only",
-            })
+            self.events.append(
+                {
+                    "event": "improvement_skipped",
+                    "agent_id": agent_id,
+                    "reason": "one_patch_demo_only",
+                }
+            )
             return None
 
         self._already_proposed = True
@@ -60,31 +63,37 @@ class BadPatchStrategy:
             "prompt_variant": "unsafe-v2",
             "reason": "demo_bad_patch_to_exercise_rollback",
         }
-        self.events.append({
-            "event": "improvement_proposed",
-            "agent_id": agent_id,
-            "trace_count": len(traces),
-            "before_metrics": before_metrics,
-            "patch": patch,
-        })
+        self.events.append(
+            {
+                "event": "improvement_proposed",
+                "agent_id": agent_id,
+                "trace_count": len(traces),
+                "before_metrics": before_metrics,
+                "patch": patch,
+            }
+        )
         return patch
 
     def apply(self, agent_id: str, config_patch: dict) -> bool:
         self.config.update(config_patch)
-        self.events.append({
-            "event": "patch_applied",
-            "agent_id": agent_id,
-            "config": dict(self.config),
-        })
+        self.events.append(
+            {
+                "event": "patch_applied",
+                "agent_id": agent_id,
+                "config": dict(self.config),
+            }
+        )
         return True
 
     def rollback(self, agent_id: str, backup_config: dict) -> None:
         self.config = dict(backup_config)
-        self.events.append({
-            "event": "rollback_restored_config",
-            "agent_id": agent_id,
-            "config": dict(self.config),
-        })
+        self.events.append(
+            {
+                "event": "rollback_restored_config",
+                "agent_id": agent_id,
+                "config": dict(self.config),
+            }
+        )
 
 
 def make_task(strategy: BadPatchStrategy, *, forced_failure: bool = False):

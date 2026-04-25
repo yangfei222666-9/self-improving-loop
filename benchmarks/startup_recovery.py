@@ -21,13 +21,18 @@ def _seed_traces(data_dir: Path, count: int, agent_id: str) -> None:
     traces_file = data_dir / "traces.jsonl"
     with open(traces_file, "w", encoding="utf-8") as f:
         for index in range(count):
-            f.write(json.dumps({
-                "agent_id": agent_id,
-                "task": f"benchmark-task-{index}",
-                "success": index % 10 != 0,
-                "duration_sec": 0.01 + (index % 5) * 0.001,
-                "timestamp": "2026-04-26T00:00:00",
-            }) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "agent_id": agent_id,
+                        "task": f"benchmark-task-{index}",
+                        "success": index % 10 != 0,
+                        "duration_sec": 0.01 + (index % 5) * 0.001,
+                        "timestamp": "2026-04-26T00:00:00",
+                    }
+                )
+                + "\n"
+            )
 
 
 def _measure(count: int, agent_id: str) -> dict:

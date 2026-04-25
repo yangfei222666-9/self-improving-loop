@@ -29,11 +29,13 @@ class RuntimeConfig:
 
     def apply_config(self, agent_id: str, config_patch: dict) -> bool:
         self.applied_patch = dict(config_patch)
-        self.config.update({
-            key: value
-            for key, value in config_patch.items()
-            if key in {"max_tool_fanout", "retry_limit", "timeout_multiplier"}
-        })
+        self.config.update(
+            {
+                key: value
+                for key, value in config_patch.items()
+                if key in {"max_tool_fanout", "retry_limit", "timeout_multiplier"}
+            }
+        )
         return True
 
     def rollback_config(self, agent_id: str, backup_config: dict) -> None:

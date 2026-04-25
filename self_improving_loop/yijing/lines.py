@@ -18,7 +18,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Mapping, Sequence
 
-
 DIMENSIONS: Sequence[str] = (
     "stability",
     "efficiency",
@@ -70,11 +69,13 @@ def _failure_count(traces: Sequence[Mapping], keywords: Iterable[str]) -> int:
         if trace.get("success"):
             continue
         context = trace.get("context") or {}
-        haystack = " ".join([
-            str(trace.get("error") or ""),
-            str(trace.get("task") or ""),
-            " ".join(f"{key}={value}" for key, value in context.items()),
-        ]).lower()
+        haystack = " ".join(
+            [
+                str(trace.get("error") or ""),
+                str(trace.get("task") or ""),
+                " ".join(f"{key}={value}" for key, value in context.items()),
+            ]
+        ).lower()
         if any(keyword in haystack for keyword in lowered_keywords):
             count += 1
     return count
@@ -113,7 +114,9 @@ def score_lines(
         else _success_rate(traces)
     )
     avg_duration = _avg_duration(traces, before_metrics)
-    consecutive_failures = int(before_metrics.get("consecutive_failures") or 0) if before_metrics else 0
+    consecutive_failures = (
+        int(before_metrics.get("consecutive_failures") or 0) if before_metrics else 0
+    )
 
     route_failures = _failure_count(
         traces,
@@ -129,11 +132,7 @@ def score_lines(
     )
 
     denominator = max(1, total)
-    efficiency = (
-        1.0
-        if avg_duration <= 0
-        else 1.0 - (avg_duration / max(latency_target_sec, 0.001))
-    )
+    efficiency = 1.0 if avg_duration <= 0 else 1.0 - (avg_duration / max(latency_target_sec, 0.001))
     learning_activity = 0.5
     if total >= 3:
         learning_activity = 0.75

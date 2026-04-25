@@ -7,17 +7,16 @@ Self-Improving Loop - Core
 import json
 import logging
 import time
-from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Dict, Any, Callable, Optional
+from pathlib import Path
+from typing import Any, Callable, Dict, Optional
 
 from .adapters import ConfigAdapter
+from .notifier import TelegramNotifier
 from .rollback import AutoRollback
 from .threshold import AdaptiveThreshold
-from .notifier import TelegramNotifier
 from .time_utils import parse_trace_timestamp
 from .trace_store import JsonlTraceStore, SQLiteTraceStore
-
 
 logger = logging.getLogger("self_improving_loop")
 logger.addHandler(logging.NullHandler())
@@ -136,7 +135,7 @@ class SelfImprovingLoop:
         agent_id: str,
         task: str,
         execute_fn: Callable[[], Any],
-        context: Dict[str, Any] = None
+        context: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         """
         执行任务并自动触发改进循环
@@ -189,8 +188,7 @@ class SelfImprovingLoop:
                 # 发送改进通知
                 if improvement_applied > 0:
                     self.notifier.notify_improvement(
-                        agent_id=agent_id,
-                        improvements_applied=improvement_applied
+                        agent_id=agent_id, improvements_applied=improvement_applied
                     )
 
         # Step 8: 检查是否需要回滚（每次任务后都检查）
@@ -204,8 +202,8 @@ class SelfImprovingLoop:
                 reason=rollback_result.get("reason", "unknown"),
                 metrics={
                     "before_metrics": rollback_result.get("before_metrics", {}),
-                    "after_metrics": rollback_result.get("after_metrics", {})
-                }
+                    "after_metrics": rollback_result.get("after_metrics", {}),
+                },
             )
 
         return {
@@ -215,7 +213,7 @@ class SelfImprovingLoop:
             "duration_sec": duration,
             "improvement_triggered": improvement_triggered,
             "improvement_applied": improvement_applied,
-            "rollback_executed": rollback_executed
+            "rollback_executed": rollback_executed,
         }
 
     def track(
@@ -233,8 +231,15 @@ class SelfImprovingLoop:
             context=context,
         )
 
-    def _record_trace(self, agent_id: str, task: str, success: bool, 
-                     duration: float, error: str = None, context: Dict = None):
+    def _record_trace(
+        self,
+        agent_id: str,
+        task: str,
+        success: bool,
+        duration: float,
+        error: str = None,
+        context: Dict = None,
+    ):
         """记录任务追踪"""
         trace = {
             "agent_id": agent_id,
@@ -243,7 +248,7 @@ class SelfImprovingLoop:
             "duration_sec": duration,
             "error": error,
             "context": context or {},
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.trace_store.append(trace)
@@ -254,8 +259,9 @@ class SelfImprovingLoop:
         traces = self._load_traces(agent_id)
 
         # 获取自适应阈值
-        failure_threshold, analysis_window_hours, cooldown_hours = \
+        failure_threshold, analysis_window_hours, cooldown_hours = (
             self.adaptive_threshold.get_threshold(agent_id, traces)
+        )
 
         # 检查冷却期
         last_improvement = self.state.get("last_improvement", {}).get(agent_id)
@@ -269,16 +275,21 @@ class SelfImprovingLoop:
         # 检查最近失败次数
         cutoff = datetime.now() - timedelta(hours=analysis_window_hours)
         recent_traces = [
-            t for t in traces
-            if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
+            t for t in traces if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
         ]
 
         failures = [t for t in recent_traces if not t.get("success")]
         if len(failures) < failure_threshold:
-            self._log("info", f"Agent {agent_id} 失败次数不足 ({len(failures)}/{failure_threshold})，跳过改进")
+            self._log(
+                "info",
+                f"Agent {agent_id} 失败次数不足 ({len(failures)}/{failure_threshold})，跳过改进",
+            )
             return False
 
-        self._log("info", f"Agent {agent_id} 触发改进（失败 {len(failures)}/{failure_threshold}，窗口 {analysis_window_hours}h）")
+        self._log(
+            "info",
+            f"Agent {agent_id} 触发改进（失败 {len(failures)}/{failure_threshold}，窗口 {analysis_window_hours}h）",
+        )
         return True
 
     def _run_improvement_cycle(self, agent_id: str) -> int:
@@ -402,9 +413,7 @@ class SelfImprovingLoop:
             return None
 
         # 计算改进后的指标
-        improved_at = parse_trace_timestamp({
-            "timestamp": backup_info.get("improved_at")
-        })
+        improved_at = parse_trace_timestamp({"timestamp": backup_info.get("improved_at")})
         after_metrics = self._calculate_metrics(agent_id, since=improved_at)
 
         # 检查是否达到验证窗口
@@ -414,20 +423,14 @@ class SelfImprovingLoop:
         # 判断是否需要回滚
         before_metrics = backup_info.get("before_metrics", {})
         should_rollback, reason = self.auto_rollback.should_rollback(
-            agent_id,
-            backup_info["improvement_id"],
-            before_metrics,
-            after_metrics
+            agent_id, backup_info["improvement_id"], before_metrics, after_metrics
         )
 
         if should_rollback:
             self._log("warn", f"检测到效果变差，执行回滚: {reason}")
 
             # 执行回滚
-            result = self.auto_rollback.rollback(
-                agent_id,
-                backup_info["backup_id"]
-            )
+            result = self.auto_rollback.rollback(agent_id, backup_info["backup_id"])
 
             if not result.get("success"):
                 error = result.get("error", "rollback failed without error detail")
@@ -463,7 +466,10 @@ class SelfImprovingLoop:
                     }
 
                 if not restore_result.get("restore_applied"):
-                    self._log("error", f"回滚判定已记录，但未执行真实配置恢复: {restore_result.get('error')}")
+                    self._log(
+                        "error",
+                        f"回滚判定已记录，但未执行真实配置恢复: {restore_result.get('error')}",
+                    )
                     return {
                         "agent_id": agent_id,
                         "reason": reason,
@@ -503,13 +509,11 @@ class SelfImprovingLoop:
         cutoff = since or (datetime.now() - timedelta(hours=analysis_window_hours))
         if since is not None:
             recent_traces = [
-                t for t in traces
-                if (ts := parse_trace_timestamp(t)) is not None and ts >= cutoff
+                t for t in traces if (ts := parse_trace_timestamp(t)) is not None and ts >= cutoff
             ]
         else:
             recent_traces = [
-                t for t in traces
-                if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
+                t for t in traces if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
             ]
 
         if not recent_traces:
@@ -517,7 +521,7 @@ class SelfImprovingLoop:
                 "success_rate": 0.0,
                 "avg_duration_sec": 0.0,
                 "total_tasks": 0,
-                "consecutive_failures": 0
+                "consecutive_failures": 0,
             }
 
         total = len(recent_traces)
@@ -539,7 +543,7 @@ class SelfImprovingLoop:
             "success_rate": success_rate,
             "avg_duration_sec": avg_duration,
             "total_tasks": total,
-            "consecutive_failures": consecutive_failures
+            "consecutive_failures": consecutive_failures,
         }
 
     def _load_traces(self, agent_id: str = None) -> list:
@@ -559,7 +563,7 @@ class SelfImprovingLoop:
                 "total_tasks": len(traces),
                 "last_improvement": last_improvement,
                 "rollback_count": len(rollback_history),
-                "rollback_history": rollback_history[-5:]
+                "rollback_history": rollback_history[-5:],
             }
         else:
             # 全局统计
@@ -569,7 +573,7 @@ class SelfImprovingLoop:
                 "total_improvements": len(self.state.get("last_improvement", {})),
                 "agents_improved": list(self.state.get("last_improvement", {}).keys()),
                 "total_rollbacks": rollback_stats["total_rollbacks"],
-                "agents_rolled_back": rollback_stats["agents_rolled_back"]
+                "agents_rolled_back": rollback_stats["agents_rolled_back"],
             }
 
     def _load_state(self) -> Dict:

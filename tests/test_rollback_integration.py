@@ -5,10 +5,9 @@ not just "history is empty".
 Covers GitHub issue #5:
   https://github.com/yangfei222666-9/self-improving-loop/issues/5
 """
-from pathlib import Path
-from datetime import datetime, timedelta
 
-import pytest
+from datetime import datetime, timedelta
+from pathlib import Path
 
 from self_improving_loop import AdaptiveThreshold, AutoRollback
 
@@ -18,10 +17,8 @@ def test_success_rate_drop_triggers_rollback(tmp_path: Path):
     should, reason = r.should_rollback(
         agent_id="a1",
         improvement_id="imp-1",
-        before_metrics={"success_rate": 0.90, "avg_duration_sec": 1.0,
-                        "consecutive_failures": 0},
-        after_metrics={"success_rate": 0.70, "avg_duration_sec": 1.0,
-                       "consecutive_failures": 0},
+        before_metrics={"success_rate": 0.90, "avg_duration_sec": 1.0, "consecutive_failures": 0},
+        after_metrics={"success_rate": 0.70, "avg_duration_sec": 1.0, "consecutive_failures": 0},
     )
     assert should is True
     assert "成功率" in reason or "success" in reason.lower()
@@ -33,10 +30,8 @@ def test_tiny_success_rate_drop_is_tolerated(tmp_path: Path):
     should, _ = r.should_rollback(
         agent_id="a1",
         improvement_id="imp-1",
-        before_metrics={"success_rate": 0.90, "avg_duration_sec": 1.0,
-                        "consecutive_failures": 0},
-        after_metrics={"success_rate": 0.85, "avg_duration_sec": 1.0,
-                       "consecutive_failures": 0},
+        before_metrics={"success_rate": 0.90, "avg_duration_sec": 1.0, "consecutive_failures": 0},
+        after_metrics={"success_rate": 0.85, "avg_duration_sec": 1.0, "consecutive_failures": 0},
     )
     assert should is False
 
@@ -46,10 +41,12 @@ def test_latency_increase_above_20pct_triggers_rollback(tmp_path: Path):
     should, reason = r.should_rollback(
         agent_id="a1",
         improvement_id="imp-1",
-        before_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0,
-                        "consecutive_failures": 0},
-        after_metrics={"success_rate": 0.9, "avg_duration_sec": 1.3,  # +30%
-                       "consecutive_failures": 0},
+        before_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0, "consecutive_failures": 0},
+        after_metrics={
+            "success_rate": 0.9,
+            "avg_duration_sec": 1.3,  # +30%
+            "consecutive_failures": 0,
+        },
     )
     assert should is True
     assert "耗时" in reason or "latency" in reason.lower()
@@ -60,10 +57,12 @@ def test_small_latency_increase_is_tolerated(tmp_path: Path):
     should, _ = r.should_rollback(
         agent_id="a1",
         improvement_id="imp-1",
-        before_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0,
-                        "consecutive_failures": 0},
-        after_metrics={"success_rate": 0.9, "avg_duration_sec": 1.15,  # +15%
-                       "consecutive_failures": 0},
+        before_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0, "consecutive_failures": 0},
+        after_metrics={
+            "success_rate": 0.9,
+            "avg_duration_sec": 1.15,  # +15%
+            "consecutive_failures": 0,
+        },
     )
     assert should is False
 
@@ -74,10 +73,8 @@ def test_consecutive_failures_at_threshold_triggers(tmp_path: Path):
     should, reason = r.should_rollback(
         agent_id="a1",
         improvement_id="imp-1",
-        before_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0,
-                        "consecutive_failures": 0},
-        after_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0,
-                       "consecutive_failures": 5},
+        before_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0, "consecutive_failures": 0},
+        after_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0, "consecutive_failures": 5},
     )
     assert should is True
     assert "失败" in reason or "consecutive" in reason.lower()
@@ -88,10 +85,12 @@ def test_consecutive_failures_below_threshold_does_not_trigger(tmp_path: Path):
     should, _ = r.should_rollback(
         agent_id="a1",
         improvement_id="imp-1",
-        before_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0,
-                        "consecutive_failures": 0},
-        after_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0,
-                       "consecutive_failures": 4},  # just below 5
+        before_metrics={"success_rate": 0.9, "avg_duration_sec": 1.0, "consecutive_failures": 0},
+        after_metrics={
+            "success_rate": 0.9,
+            "avg_duration_sec": 1.0,
+            "consecutive_failures": 4,
+        },  # just below 5
     )
     assert should is False
 
@@ -103,10 +102,8 @@ def test_zero_before_metrics_does_not_falsely_trigger(tmp_path: Path):
     should, _ = r.should_rollback(
         agent_id="a1",
         improvement_id="imp-1",
-        before_metrics={"success_rate": 0, "avg_duration_sec": 0,
-                        "consecutive_failures": 0},
-        after_metrics={"success_rate": 0.8, "avg_duration_sec": 1.0,
-                       "consecutive_failures": 0},
+        before_metrics={"success_rate": 0, "avg_duration_sec": 0, "consecutive_failures": 0},
+        after_metrics={"success_rate": 0.8, "avg_duration_sec": 1.0, "consecutive_failures": 0},
     )
     assert should is False
 
@@ -164,10 +161,7 @@ def test_thresholds_are_documented_constants(tmp_path: Path):
 def test_adaptive_threshold_profile_accepts_timestamp_only_traces(tmp_path: Path):
     threshold = AdaptiveThreshold(str(tmp_path))
     now = datetime.now()
-    history = [
-        {"timestamp": (now - timedelta(hours=i)).isoformat()}
-        for i in range(4)
-    ]
+    history = [{"timestamp": (now - timedelta(hours=i)).isoformat()} for i in range(4)]
 
     profile = threshold.get_agent_profile("timestamp-only-agent", history)
 

@@ -20,8 +20,8 @@ Auto Rollback - 自动回滚机制
 
 import json
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
 
 
@@ -30,7 +30,7 @@ class AutoRollback:
 
     # 回滚阈值
     SUCCESS_RATE_DROP_THRESHOLD = 0.10  # 成功率下降 >10%
-    LATENCY_INCREASE_THRESHOLD = 0.20   # 耗时增加 >20%
+    LATENCY_INCREASE_THRESHOLD = 0.20  # 耗时增加 >20%
     CONSECUTIVE_FAILURES_THRESHOLD = 5  # 连续失败 ≥5 次
 
     # 验证窗口
@@ -41,7 +41,7 @@ class AutoRollback:
             data_dir = Path.home() / ".self-improving-loop" / "rollback"
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.backup_file = self.data_dir / "config_backups.jsonl"
         self.rollback_log = self.data_dir / "rollback_history.jsonl"
 
@@ -73,11 +73,7 @@ class AutoRollback:
         return backup_id
 
     def should_rollback(
-        self,
-        agent_id: str,
-        improvement_id: str,
-        before_metrics: Dict,
-        after_metrics: Dict
+        self, agent_id: str, improvement_id: str, before_metrics: Dict, after_metrics: Dict
     ) -> tuple[bool, str]:
         """
         判断是否应该回滚
@@ -100,7 +96,7 @@ class AutoRollback:
             if success_rate_drop > self.SUCCESS_RATE_DROP_THRESHOLD:
                 return (
                     True,
-                    f"成功率下降 {success_rate_drop:.1%} (从 {before_success_rate:.1%} 到 {after_success_rate:.1%})"
+                    f"成功率下降 {success_rate_drop:.1%} (从 {before_success_rate:.1%} 到 {after_success_rate:.1%})",
                 )
 
         # 检查平均耗时
@@ -112,16 +108,13 @@ class AutoRollback:
             if latency_increase > self.LATENCY_INCREASE_THRESHOLD:
                 return (
                     True,
-                    f"平均耗时增加 {latency_increase:.1%} (从 {before_latency:.1f}s 到 {after_latency:.1f}s)"
+                    f"平均耗时增加 {latency_increase:.1%} (从 {before_latency:.1f}s 到 {after_latency:.1f}s)",
                 )
 
         # 检查连续失败
         consecutive_failures = after_metrics.get("consecutive_failures", 0)
         if consecutive_failures >= self.CONSECUTIVE_FAILURES_THRESHOLD:
-            return (
-                True,
-                f"连续失败 {consecutive_failures} 次"
-            )
+            return (True, f"连续失败 {consecutive_failures} 次")
 
         return (False, "")
 
@@ -139,10 +132,7 @@ class AutoRollback:
         # 查找备份
         backup = self._find_backup(backup_id)
         if not backup:
-            return {
-                "success": False,
-                "error": f"Backup not found: {backup_id}"
-            }
+            return {"success": False, "error": f"Backup not found: {backup_id}"}
 
         # 恢复配置
         config = backup["config"]
@@ -171,10 +161,7 @@ class AutoRollback:
             }
 
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     def _find_backup(self, backup_id: str) -> Optional[Dict]:
         """查找备份"""
@@ -221,6 +208,7 @@ class AutoRollback:
 # ============================================================================
 # 使用示例
 # ============================================================================
+
 
 def example_usage():
     """使用示例"""

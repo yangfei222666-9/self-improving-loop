@@ -7,11 +7,11 @@ Self-Improving Loop - Core Module
 __version__ = "0.1.1"
 __author__ = "Self-Improving Loop Contributors"
 
-from .core import SelfImprovingLoop
 from .adapters import ConfigAdapter
+from .core import SelfImprovingLoop
+from .notifier import TelegramNotifier
 from .rollback import AutoRollback
 from .threshold import AdaptiveThreshold
-from .notifier import TelegramNotifier
 from .trace_store import JsonlTraceStore, SQLiteTraceStore
 from .yijing import YijingEvolutionStrategy
 

@@ -8,10 +8,10 @@ and relative %.
 Usage:
     python benchmarks/overhead.py
 """
+
 import statistics
 import tempfile
 import time
-from pathlib import Path
 
 from self_improving_loop import SelfImprovingLoop
 
@@ -79,9 +79,11 @@ def fmt(v):
 
 def main():
     print(f"self-improving-loop · overhead benchmark · {ITERATIONS} iters / workload\n")
-    print(f"{'workload':<18}  {'mode':<9}  "
-          f"{'mean':>9}  {'median':>9}  {'p95':>9}  "
-          f"{'overhead':>10}")
+    print(
+        f"{'workload':<18}  {'mode':<9}  "
+        f"{'mean':>9}  {'median':>9}  {'p95':>9}  "
+        f"{'overhead':>10}"
+    )
     print("-" * 78)
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -102,13 +104,17 @@ def main():
             else:
                 rel_str = "n/a"
 
-            print(f"{name:<18}  {'direct':<9}  "
-                  f"{fmt(direct['mean_ms']):>9}  {fmt(direct['median_ms']):>9}  "
-                  f"{fmt(direct['p95_ms']):>9}  {'—':>10}")
-            print(f"{name:<18}  {'wrapped':<9}  "
-                  f"{fmt(wrapped['mean_ms']):>9}  {fmt(wrapped['median_ms']):>9}  "
-                  f"{fmt(wrapped['p95_ms']):>9}  "
-                  f"{'+'+fmt(abs_overhead_ms)+' ms ('+rel_str+')':>10}")
+            print(
+                f"{name:<18}  {'direct':<9}  "
+                f"{fmt(direct['mean_ms']):>9}  {fmt(direct['median_ms']):>9}  "
+                f"{fmt(direct['p95_ms']):>9}  {'—':>10}"
+            )
+            print(
+                f"{name:<18}  {'wrapped':<9}  "
+                f"{fmt(wrapped['mean_ms']):>9}  {fmt(wrapped['median_ms']):>9}  "
+                f"{fmt(wrapped['p95_ms']):>9}  "
+                f"{'+'+fmt(abs_overhead_ms)+' ms ('+rel_str+')':>10}"
+            )
             print()
 
 

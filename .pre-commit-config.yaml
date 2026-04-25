@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: ruff check
+        language: python
+        additional_dependencies: ["ruff>=0.15"]
+        types_or: [python]
+
+      - id: black
+        name: black
+        entry: black
+        language: python
+        additional_dependencies: ["black>=26.0"]
+        types_or: [python]
+
+      - id: mypy
+        name: mypy
+        entry: mypy self_improving_loop
+        language: python
+        additional_dependencies: ["mypy>=1.20"]
+        pass_filenames: false
