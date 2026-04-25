@@ -442,10 +442,16 @@ class SelfImprovingLoop:
         _, analysis_window_hours, _ = self.adaptive_threshold.get_threshold(agent_id, traces)
 
         cutoff = since or (datetime.now() - timedelta(hours=analysis_window_hours))
-        recent_traces = [
-            t for t in traces
-            if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
-        ]
+        if since is not None:
+            recent_traces = [
+                t for t in traces
+                if (ts := parse_trace_timestamp(t)) is not None and ts >= cutoff
+            ]
+        else:
+            recent_traces = [
+                t for t in traces
+                if (ts := parse_trace_timestamp(t)) is not None and ts > cutoff
+            ]
 
         if not recent_traces:
             return {
