@@ -46,7 +46,7 @@ def main() -> int:
     loop = SelfImprovingLoop(
         data_dir=str(data_dir),
         storage="sqlite",
-        improvement_strategy=YijingEvolutionStrategy(latency_target_sec=0.000001),
+        strategy=YijingEvolutionStrategy(latency_target_sec=0.000001),
         config_adapter=adapter,
     )
     loop.adaptive_threshold.set_manual_threshold(

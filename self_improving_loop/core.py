@@ -25,6 +25,7 @@ class SelfImprovingLoop:
         self,
         data_dir: str = None,
         notifier: Optional[TelegramNotifier] = None,
+        strategy: Optional[Any] = None,
         improvement_strategy: Optional[Any] = None,
         config_adapter: Optional[ConfigAdapter] = None,
         storage: str = "jsonl",
@@ -36,6 +37,9 @@ class SelfImprovingLoop:
             notifier: any subclass of TelegramNotifier (override
                 ``_send_message``) to route events to Slack / Discord /
                 email / etc. Defaults to a stdout-logging stub.
+            strategy: preferred alias for ``improvement_strategy``. Pass
+                ``YijingEvolutionStrategy`` here when using the hexagram-guided
+                policy router.
             improvement_strategy: optional duck-typed strategy with
                 ``analyze(agent_id=..., traces=..., before_metrics=...)``,
                 and, for legacy compatibility, optional ``apply`` /
@@ -48,6 +52,11 @@ class SelfImprovingLoop:
                 append-only files; ``"sqlite"`` uses a WAL-enabled SQLite DB
                 for multi-worker deployments. Both are stdlib-only.
         """
+        if strategy is not None and improvement_strategy is not None:
+            raise ValueError("Use either strategy or improvement_strategy, not both")
+        if strategy is not None:
+            improvement_strategy = strategy
+
         if data_dir is None:
             data_dir = Path.home() / ".self-improving-loop" / "data"
         self.data_dir = Path(data_dir)

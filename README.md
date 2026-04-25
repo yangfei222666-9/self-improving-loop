@@ -1,7 +1,7 @@
 # self-improving-loop
 
-> A rollback-first reliability layer for AI agents:
-> **execute → track → analyze → strategy-apply → rollback on regression.**
+> A hexagram-guided reliability loop for AI agents:
+> **trace → six lines → hexagram policy → guarded patch → rollback on regression.**
 
 [![PyPI](https://img.shields.io/pypi/v/self-improving-loop.svg)](https://pypi.org/project/self-improving-loop/)
 [![CI](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml/badge.svg)](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml)
@@ -10,6 +10,11 @@
 [![LLM overhead](https://img.shields.io/badge/LLM%20overhead-%3C1%25-brightgreen)](#performance)
 
 Most "self-improving agent" projects stop at *"log the failures, let the next run read the log"*. That's a methodology, not a loop. **This package is the loop, implemented as a compact pure-stdlib Python runtime** — no framework lock-in, no LLM dependency, no cloud.
+
+The differentiator is the optional Yijing strategy: runtime signals are mapped
+into six engineering lines, recognized as a hexagram state, converted into a
+bounded policy patch, then verified through the same rollback guard as any
+other strategy. It is a state machine, not fortune telling.
 
 Overhead is negligible for normal LLM/HTTP agent calls; for sub-10ms in-memory functions, measure before wrapping.
 
@@ -24,7 +29,7 @@ Wrap any function, get:
 - 🛡 **Rollback trigger** when the new config regresses (>10% success drop, >20% latency gain, or 5 consecutive failures)
 - 📬 **Pluggable notifier** (stub by default — swap in Telegram / Slack / whatever)
 
-Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji), which includes a 346-heartbeat Ising experiment and production-scale agent workloads.
+Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji), where the same six-line state model is used for production-scale agent workloads.
 
 ---
 
@@ -57,7 +62,8 @@ Stable:
 - Optional SQLite/WAL trace storage
 - Strategy-triggered config patching
 - ConfigAdapter-backed rollback when a patch regresses
-- Optional Yijing hexagram strategy as a deterministic state router
+- Optional Yijing hexagram strategy as a deterministic state router:
+  runtime traces -> six engineering lines -> hexagram -> bounded policy patch
 
 Experimental:
 
@@ -186,16 +192,29 @@ The six lines are:
 5. collaboration
 6. governance
 
-Use it as an `improvement_strategy`:
+Use it as the strategy:
 
 ```python
 from self_improving_loop import SelfImprovingLoop, YijingEvolutionStrategy
 
 loop = SelfImprovingLoop(
-    improvement_strategy=YijingEvolutionStrategy(),
+    strategy=YijingEvolutionStrategy(),
     config_adapter=my_config_adapter,
 )
 ```
+
+`improvement_strategy=` remains supported for backward compatibility.
+
+The engineering mapping is explicit:
+
+| Line | Dimension | Yang means | Yin means |
+|---|---|---|---|
+| 1 | stability | dependencies are healthy | API/network/dependency failure |
+| 2 | efficiency | high success, low latency | low success or high latency |
+| 3 | learning activity | feedback / recovery signal exists | repeated failure without learning |
+| 4 | routing accuracy | model/tool choice looks correct | wrong model/tool/schema drift |
+| 5 | collaboration | tools / agents hand off cleanly | conflicts or context breaks |
+| 6 | governance | cost and rollout are bounded | quota, cost, or policy drift |
 
 The first version supports eight core policy states: Qian, Kun, Zhen, Kan, Bo,
 Fu, Ji Ji, and Wei Ji. It returns a bounded config patch and relies on the same

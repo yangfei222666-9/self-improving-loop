@@ -102,6 +102,28 @@ def test_loop_rejects_unknown_trace_storage(tmp_path: Path):
         SelfImprovingLoop(data_dir=str(tmp_path), storage="yaml")
 
 
+def test_strategy_alias_is_preferred_entrypoint(tmp_path: Path):
+    class Strategy:
+        def analyze(self, agent_id, traces, before_metrics):
+            return None
+
+    strategy = Strategy()
+    loop = SelfImprovingLoop(data_dir=str(tmp_path), strategy=strategy)
+    assert loop.improvement_strategy is strategy
+
+
+def test_strategy_alias_rejects_duplicate_strategy_args(tmp_path: Path):
+    class Strategy:
+        pass
+
+    with pytest.raises(ValueError, match="either strategy or improvement_strategy"):
+        SelfImprovingLoop(
+            data_dir=str(tmp_path),
+            strategy=Strategy(),
+            improvement_strategy=Strategy(),
+        )
+
+
 def test_improvement_strategy_hook_applies_and_records_backup(tmp_path: Path):
     class Strategy:
         def __init__(self):

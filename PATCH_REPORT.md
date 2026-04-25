@@ -58,3 +58,12 @@ Scope: `self-improving-loop` only. No changes were made to `zhuge-skill`, `taiji
 | TestPyPI upload | Blocked: no `PYPI` / `TWINE` credentials are present in the environment, and no token was used from chat history. |
 | Demo GIF/asciinema | Not done in this patch; README now has stronger executable examples, but no recording artifact yet. |
 | `LoopResult` dataclass | Not done. The current dict contract remains stable; changing result type before HN would be higher API risk than adding the safe `track()` alias. |
+
+## Follow-up · Yijing positioning/API alignment
+
+| Item | Before | After | Evidence |
+|---|---|---|---|
+| Public positioning | Generic rollback-first reliability loop. | Hexagram-guided reliability loop with the rollback guard still central. | README top line and `pyproject.toml` description updated. |
+| Constructor API | Only `improvement_strategy=` was documented as the strategy hook. | Added preferred `strategy=` alias while keeping `improvement_strategy=` compatible. | `tests/test_smoke.py::test_strategy_alias_is_preferred_entrypoint`. |
+| Duplicate strategy args | Passing both names was ambiguous. | Raises `ValueError`. | `tests/test_smoke.py::test_strategy_alias_rejects_duplicate_strategy_args`. |
+| Yijing example | Used legacy `improvement_strategy=`. | Uses `strategy=YijingEvolutionStrategy(...)`. | `examples/04_yijing_strategy.py`. |

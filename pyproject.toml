@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "self-improving-loop"
 version = "0.1.0"
-description = "A safety-first self-improvement loop for AI agents: execute → track → analyze → strategy-apply → rollback on regression."
+description = "A hexagram-guided reliability loop for AI agents: trace runtime signals, choose guarded patches, and roll back regressions."
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"

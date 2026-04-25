@@ -15,10 +15,11 @@ Check: https://news.ycombinator.com/show — make sure no near-identical "self-i
 Candidates, ranked:
 
 1. **`Show HN: self-improving-loop – auto-rollback when your AI agent regresses`**  *(76 chars, outcome-focused)*
-2. `Show HN: A pure-stdlib rollback guard for AI agents`  *(54 chars, shortest)*
-3. `Show HN: self-improving-loop – reliability layer for AI agents`  *(67 chars, broader)*
+2. `Show HN: Hexagram-guided rollback guard for AI agents`  *(58 chars, differentiator)*
+3. `Show HN: A pure-stdlib rollback guard for AI agents`  *(54 chars, shortest)*
 
-Pick #1 — the rollback outcome is clearer than a line-count hook and does not become stale after implementation work.
+Pick #1 if posting to general HN. Pick #2 if the README top section clearly
+shows the six-line state machine; it is more unique but invites skepticism.
 
 ---
 
@@ -44,6 +45,12 @@ triggers a config analysis when failures pile up, and — most importantly —
 auto-rolls-back if the new config regresses (>10% success drop, >20%
 latency increase, or 5 consecutive failures).
 
+The more experimental/differentiated part: it includes an optional
+hexagram-guided strategy. Runtime signals map into six engineering lines
+(stability, efficiency, learning, routing, collaboration, governance), then
+into a bounded policy patch. The patch still goes through the same canary /
+rollback guard; it is a state router, not fortune telling.
+
 Things I wanted it to be:
 
   - pure stdlib — you can drop it into any project without pulling in a
@@ -55,9 +62,9 @@ Things I wanted it to be:
   - adaptive per agent — a critical alerting agent shouldn't have the same
     failure tolerance as a batch classifier
 
-Extracted from a larger project (TaijiOS — an AI operating system started on
-Chinese New Year 2026-02-17 and built with heavy AI collaboration). This piece
-felt general enough to spin out.
+Extracted from a larger project (TaijiOS, started on Chinese New Year
+2026-02-17 and built with heavy AI collaboration). This piece felt general
+enough to spin out.
 
 Honest caveats:
   - 0.1.0. Smoke-tested (38 tests), but real-world battle testing is
