@@ -51,6 +51,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | 2026-04-26 00:28 | X | Launch copy drift: post says `42 tests`; release/CI copy uses `45 tests` | https://x.com/jiuxiao79/status/2048043783431021014 | Recorded drift; do not rewrite metrics from memory | Use `45 tests` in future copy |
 | 2026-04-26 02:19 | GitHub | Checkpoint: 0 stars, 0 forks, 0 watchers, 6 wheel downloads, 0 source downloads, latest CI success | `gh repo view`, `gh release view v0.1.1`, `gh run list` | Recorded early download movement; no positioning change | Re-check at +6h / +24h |
 | 2026-04-26 02:31 | GitHub Issues | Closed #7 cross-platform verification and #9 examples; narrowed #8 to publish workflow + pre-commit; open issues now 6 | `gh issue close 7`, `gh issue close 9`, `gh issue edit 8`, `gh issue list` | Removed stale readiness blockers without hiding remaining infra work | Next P0 issue is #1 concurrency file locking |
+| 2026-04-26 02:51 | GitHub Issues | Closed #1 after verifying JSONL sidecar lock, multiprocessing append test, 45 tests, wheel/sdist build, and twine check | `gh issue close 1`, `pytest -q`, `python -m build`, `twine check dist/*` | Removed stale high-priority production blocker; open issues now 5 | Next P0 issue is #2 trace rotation / compaction |
 
 ---
 
