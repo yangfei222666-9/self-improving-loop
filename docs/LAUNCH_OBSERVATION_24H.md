@@ -17,7 +17,11 @@ Recorded at: `2026-04-26T00:21:31+0800`
 
 | Metric | Value | Evidence / Note |
 |---|---:|---|
-| X post URL | `UNCAPTURED` | User said the post was sent; canonical URL is not yet captured. |
+| X post URL | https://x.com/jiuxiao79/status/2048043783431021014 | Captured from the account profile page. |
+| X views | `10` | Visible profile metric at `2026-04-26 00:28 +0800`. |
+| X replies | `0` | Visible profile metric at `2026-04-26 00:28 +0800`. |
+| X reposts | `0` | Visible profile metric at `2026-04-26 00:28 +0800`. |
+| X likes | `0` | Visible profile metric at `2026-04-26 00:28 +0800`. |
 | GitHub stars | `0` | `gh repo view ... --json stargazerCount` |
 | GitHub forks | `0` | `gh repo view ... --json forkCount` |
 | GitHub watchers | `0` | `gh repo view ... --json watchers` |
@@ -43,6 +47,8 @@ Append one row per real external signal. Do not count internal edits as traction
 | Time (+0800) | Channel | Signal | Evidence URL / ID | Action Taken | Follow-up |
 |---|---|---|---|---|---|
 | 2026-04-26 00:21 | GitHub | Baseline captured: 0 stars, 0 forks, 1 wheel download, 0 new post-release issues | This file | Created observation ledger | Capture X post URL |
+| 2026-04-26 00:28 | X | Canonical post captured: 10 views, 0 replies, 0 reposts, 0 likes | https://x.com/jiuxiao79/status/2048043783431021014 | Updated baseline metrics | Re-check at +6h / +24h |
+| 2026-04-26 00:28 | X | Launch copy drift: post says `42 tests`; release/CI copy uses `45 tests` | https://x.com/jiuxiao79/status/2048043783431021014 | Recorded drift; do not rewrite metrics from memory | Use `45 tests` in future copy |
 
 ---
 
@@ -50,9 +56,10 @@ Append one row per real external signal. Do not count internal edits as traction
 
 | Status | Task | Owner | Evidence / Stop Condition |
 |---|---|---|---|
-| TODO | Capture canonical X post URL | User / Codex if browser access available | URL pasted into this file |
+| DONE | Capture canonical X post URL | Codex via Computer Use | https://x.com/jiuxiao79/status/2048043783431021014 |
 | TODO | Re-check GitHub stars / forks / release downloads at +6h | Codex | Append snapshot row |
 | TODO | Re-check GitHub stars / forks / release downloads at +24h | Codex | Append final 24h row |
+| TODO | Use corrected `45 tests` count in future launch copy | Codex | No new post repeats the `42 tests` drift |
 | TODO | If someone asks for integration, add one adapter example before changing positioning | Codex | New issue/comment or X reply asks for LangGraph/CrewAI/AutoGen/MCP |
 | HOLD | Do not rewrite README positioning during the 24h window without external evidence | Codex | Only unlock if a real user misunderstands a specific claim |
 
