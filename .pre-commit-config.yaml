@@ -19,5 +19,5 @@ repos:
         name: mypy
         entry: mypy self_improving_loop
         language: python
-        additional_dependencies: ["mypy>=1.20"]
+        additional_dependencies: ["mypy>=1.19,<1.20"]
         pass_filenames: false
