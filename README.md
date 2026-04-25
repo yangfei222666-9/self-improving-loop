@@ -88,6 +88,32 @@ trail. It is not a mocked success path.
 
 ---
 
+## Use it as a safety layer for your current agent
+
+This package is not trying to replace LangGraph, CrewAI, AutoGen, OpenAI
+Agents, or your own internal runner. It wraps the callable you already trust:
+
+```python
+result = loop.execute_with_improvement(
+    agent_id="support-agent",
+    task="answer ticket",
+    execute_fn=lambda: existing_agent.run(ticket),
+    context={"framework": "your-current-stack"},
+)
+```
+
+Two dependency-free examples show the integration seam:
+
+```bash
+python examples/wrap_existing_agent.py
+python examples/langgraph_style_node.py
+```
+
+The goal is narrow: traces, thresholds, guarded strategy application, and
+rollback evidence around an agent you already have.
+
+---
+
 ## Why this exists
 
 Most agents have this failure mode:

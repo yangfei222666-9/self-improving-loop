@@ -31,3 +31,42 @@ def test_regression_rollback_demo_runs_end_to_end():
         "event trail written:",
     ]:
         assert phrase in output
+
+
+def test_wrap_existing_agent_example_runs():
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "examples" / "wrap_existing_agent.py")],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        timeout=20,
+    )
+
+    assert result.returncode == 0, result.stderr
+    output = result.stdout
+    for phrase in [
+        "existing agent wrapped",
+        "failure detected",
+        "strategy patch applied",
+        "trace file:",
+    ]:
+        assert phrase in output
+
+
+def test_langgraph_style_node_example_runs():
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "examples" / "langgraph_style_node.py")],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        timeout=20,
+    )
+
+    assert result.returncode == 0, result.stderr
+    output = result.stdout
+    for phrase in [
+        "langgraph-style node wrapped",
+        "trace written",
+        "trace file:",
+    ]:
+        assert phrase in output
