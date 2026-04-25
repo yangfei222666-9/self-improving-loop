@@ -72,7 +72,7 @@ Honest caveats:
   - The analysis_failure() step is statistical, not LLM-based. If you want
     LLM-authored config tweaks, subclass it.
 
-PyPI: pip install self-improving-loop
+Latest release: https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1
 Repo: https://github.com/yangfei222666-9/self-improving-loop
 MIT licensed.
 
@@ -117,9 +117,9 @@ notice with redistributed code.
 ## Pre-submission checklist
 
 - [x] README has at least one screenshot/asciinema-style recording (`assets/demo/self_improving_loop_demo.svg` + `.cast` + `.txt`)
-- [ ] `pip install self-improving-loop` actually works from PyPI (upload wheel + sdist first)
-- [ ] TestPyPI dry-run works before production PyPI release
-- [ ] GitHub repo description is set (use the PyPI one-liner)
+- [x] GitHub Release v0.1.1 exists with wheel + sdist attached
+- [ ] PyPI package is intentionally not used for this launch until package ownership is resolved
+- [ ] GitHub repo description is set from the release one-liner
 - [ ] Topics set: `ai-agents`, `self-improving`, `feedback-loop`, `python`, `llm`, `autonomous-agents`
 - [x] CHANGELOG.md with 0.1.1 entry
 - [ ] `tests/` passes (currently 42/42)

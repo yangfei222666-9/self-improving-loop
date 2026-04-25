@@ -3,13 +3,13 @@
 > A hexagram-guided reliability loop for AI agents:
 > **trace → six lines → hexagram policy → guarded patch → rollback on regression.**
 
-[![PyPI](https://img.shields.io/pypi/v/self-improving-loop.svg)](https://pypi.org/project/self-improving-loop/)
+[![GitHub Release](https://img.shields.io/github/v/release/yangfei222666-9/self-improving-loop?display_name=tag)](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1)
 [![CI](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml/badge.svg)](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![LLM overhead](https://img.shields.io/badge/LLM%20overhead-%3C1%25-brightgreen)](#performance)
 
-Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md)
+Latest verified release: [v0.1.1](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1) · Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md)
 
 Most "self-improving agent" projects stop at *"log the failures, let the next run read the log"*. That's a methodology, not a loop. **This package is the loop, implemented as a compact pure-stdlib Python runtime** — no framework lock-in, no LLM dependency, no cloud.
 
@@ -41,8 +41,16 @@ Demo artifacts: [terminal transcript](assets/demo/self_improving_loop_demo.txt) 
 
 ## Install
 
+Latest verified GitHub release:
+
 ```bash
-pip install self-improving-loop
+pip install https://github.com/yangfei222666-9/self-improving-loop/releases/download/v0.1.1/self_improving_loop-0.1.1-py3-none-any.whl
+```
+
+From source:
+
+```bash
+pip install git+https://github.com/yangfei222666-9/self-improving-loop.git@v0.1.1
 ```
 
 Zero required dependencies. Everything is Python stdlib, including optional

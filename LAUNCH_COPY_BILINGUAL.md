@@ -169,7 +169,7 @@ model, timeout, tool, or retry changes.
 Start with:
 
 ```bash
-pip install self-improving-loop
+pip install https://github.com/yangfei222666-9/self-improving-loop/releases/download/v0.1.1/self_improving_loop-0.1.1-py3-none-any.whl
 git clone https://github.com/yangfei222666-9/self-improving-loop.git
 cd self-improving-loop
 python examples/04_yijing_strategy.py
@@ -183,7 +183,7 @@ python examples/04_yijing_strategy.py
 先从这里开始：
 
 ```bash
-pip install self-improving-loop
+pip install https://github.com/yangfei222666-9/self-improving-loop/releases/download/v0.1.1/self_improving_loop-0.1.1-py3-none-any.whl
 git clone https://github.com/yangfei222666-9/self-improving-loop.git
 cd self-improving-loop
 python examples/04_yijing_strategy.py
