@@ -419,6 +419,40 @@ def test_yijing_identifies_core_hexagram_from_six_lines():
     assert state.moving_lines == ()
 
 
+def test_yijing_hexagram_requires_exactly_six_lines():
+    lines = score_lines([
+        {
+            "agent_id": "short",
+            "task": "ok",
+            "success": True,
+            "duration_sec": 0.01,
+            "timestamp": "2026-04-25T00:00:00",
+        }
+        for _ in range(4)
+    ])
+
+    with pytest.raises(ValueError, match="exactly 6 lines"):
+        identify_hexagram(lines[:5])
+
+
+def test_yijing_hexagram_rejects_duplicate_or_missing_positions():
+    lines = score_lines([
+        {
+            "agent_id": "bad-positions",
+            "task": "ok",
+            "success": True,
+            "duration_sec": 0.01,
+            "timestamp": "2026-04-25T00:00:00",
+        }
+        for _ in range(4)
+    ])
+    corrupted = list(lines)
+    corrupted[5] = corrupted[4]
+
+    with pytest.raises(ValueError, match="position 1..6"):
+        identify_hexagram(corrupted)
+
+
 def test_yijing_strategy_returns_bounded_policy_patch():
     strategy = YijingEvolutionStrategy(latency_target_sec=1.0)
     patch = strategy.analyze(

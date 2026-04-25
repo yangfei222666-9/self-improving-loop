@@ -57,6 +57,17 @@ def _name(binary: str) -> str:
 def identify_hexagram(lines: Sequence[LineSignal]) -> HexagramState:
     """Identify current state and changed state from line signals."""
 
+    lines = list(lines)
+    if len(lines) != 6:
+        raise ValueError(f"identify_hexagram requires exactly 6 lines, got {len(lines)}")
+
+    positions = [line.position for line in lines]
+    if sorted(positions) != [1, 2, 3, 4, 5, 6]:
+        raise ValueError(
+            "identify_hexagram requires one line for each position 1..6; "
+            f"got positions={positions!r}"
+        )
+
     bits = [str(line.bit) for line in lines]
     binary = "".join(bits)
     moving_positions = tuple(line.position for line in lines if line.moving)

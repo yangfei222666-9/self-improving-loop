@@ -16,7 +16,7 @@ The hexagram layer is implemented as a deterministic state machine: six runtime 
 
 ## Is it production-ready?
 
-Not yet. `v0.1.1` has 43 tests, cross-platform CI, a rollback path, JSONL/SQLite trace storage, and a first Yijing strategy. It is early and should be tested around your own agent before production use.
+Not yet. `v0.1.1` has 45 tests, cross-platform CI, a rollback path, JSONL/SQLite trace storage, and a first Yijing strategy. It is early and should be tested around your own agent before production use.
 
 ## Is this just retry logic?
 

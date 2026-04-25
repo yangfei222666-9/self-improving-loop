@@ -67,7 +67,7 @@ Extracted from a larger project (TaijiOS, started on Chinese New Year
 enough to spin out.
 
 Honest caveats:
-  - 0.1.1. Smoke-tested (43 tests), but real-world battle testing is
+  - 0.1.1. Smoke-tested (45 tests), but real-world battle testing is
     ongoing. Bug reports very welcome.
   - The analysis_failure() step is statistical, not LLM-based. If you want
     LLM-authored config tweaks, subclass it.
@@ -122,7 +122,7 @@ notice with redistributed code.
 - [ ] GitHub repo description is set from the release one-liner
 - [ ] Topics set: `ai-agents`, `self-improving`, `feedback-loop`, `python`, `llm`, `autonomous-agents`
 - [x] CHANGELOG.md with 0.1.1 entry
-- [ ] `tests/` passes (currently 43/43)
+- [ ] `tests/` passes (currently 45/45)
 - [ ] LICENSE file in repo root (MIT, already there)
 - [ ] Sanity-run: `python -c "from self_improving_loop import SelfImprovingLoop; SelfImprovingLoop()"`
 
