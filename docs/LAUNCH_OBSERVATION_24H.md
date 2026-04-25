@@ -52,6 +52,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | 2026-04-26 02:19 | GitHub | Checkpoint: 0 stars, 0 forks, 0 watchers, 6 wheel downloads, 0 source downloads, latest CI success | `gh repo view`, `gh release view v0.1.1`, `gh run list` | Recorded early download movement; no positioning change | Re-check at +6h / +24h |
 | 2026-04-26 02:31 | GitHub Issues | Closed #7 cross-platform verification and #9 examples; narrowed #8 to publish workflow + pre-commit; open issues now 6 | `gh issue close 7`, `gh issue close 9`, `gh issue edit 8`, `gh issue list` | Removed stale readiness blockers without hiding remaining infra work | Next P0 issue is #1 concurrency file locking |
 | 2026-04-26 02:51 | GitHub Issues | Closed #1 after verifying JSONL sidecar lock, multiprocessing append test, 45 tests, wheel/sdist build, and twine check | `gh issue close 1`, `pytest -q`, `python -m build`, `twine check dist/*` | Removed stale high-priority production blocker; open issues now 5 | Next P0 issue is #2 trace rotation / compaction |
+| 2026-04-26 02:59 | GitHub Issues | Implemented #2 JSONL rotation / compaction: gzip archives, `max_archives`, public loop config, and `compact(max_entries=...)` | `pytest -q` = 49 passed; `compileall`; isolated `python -m build`; `twine check dist/*`; clean wheel install smoke | Removes week-1 production disk-growth blocker for JSONL users while keeping SQLite path unchanged | Push, wait CI, then close #2 if green |
 
 ---
 
@@ -62,7 +63,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | DONE | Capture canonical X post URL | Codex via Computer Use | https://x.com/jiuxiao79/status/2048043783431021014 |
 | TODO | Re-check GitHub stars / forks / release downloads at +6h | Codex | Append snapshot row |
 | TODO | Re-check GitHub stars / forks / release downloads at +24h | Codex | Append final 24h row |
-| TODO | Use corrected `45 tests` count in future launch copy | Codex | No new post repeats the `42 tests` drift |
+| TODO | Use corrected `49 tests` count in future launch copy | Codex | No new post repeats stale test-count drift |
 | TODO | If someone asks for integration, add one adapter example before changing positioning | Codex | New issue/comment or X reply asks for LangGraph/CrewAI/AutoGen/MCP |
 | HOLD | Do not rewrite README positioning during the 24h window without external evidence | Codex | Only unlock if a real user misunderstands a specific claim |
 

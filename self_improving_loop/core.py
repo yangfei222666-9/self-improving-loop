@@ -29,6 +29,9 @@ class SelfImprovingLoop:
         improvement_strategy: Optional[Any] = None,
         config_adapter: Optional[ConfigAdapter] = None,
         storage: str = "jsonl",
+        jsonl_max_bytes: Optional[int] = None,
+        jsonl_archive_dir: Optional[str] = None,
+        jsonl_max_archives: int = 5,
     ):
         """
         Args:
@@ -51,6 +54,12 @@ class SelfImprovingLoop:
             storage: trace storage backend. ``"jsonl"`` keeps transparent
                 append-only files; ``"sqlite"`` uses a WAL-enabled SQLite DB
                 for multi-worker deployments. Both are stdlib-only.
+            jsonl_max_bytes: optional active ``traces.jsonl`` size threshold.
+                When exceeded, the next append rotates the current file into a
+                gzipped archive before writing the new trace.
+            jsonl_archive_dir: optional archive directory for rotated JSONL
+                trace files. Defaults to ``data_dir/trace_archives``.
+            jsonl_max_archives: number of gzipped JSONL archives to keep.
         """
         if strategy is not None and improvement_strategy is not None:
             raise ValueError("Use either strategy or improvement_strategy, not both")
@@ -78,7 +87,12 @@ class SelfImprovingLoop:
         self.traces_file = self.data_dir / "traces.jsonl"
         self.trace_db_file = self.data_dir / "traces.sqlite3"
         if storage == "jsonl":
-            self.trace_store = JsonlTraceStore(self.traces_file)
+            self.trace_store = JsonlTraceStore(
+                self.traces_file,
+                max_bytes=jsonl_max_bytes,
+                archive_dir=jsonl_archive_dir,
+                max_archives=jsonl_max_archives,
+            )
         elif storage == "sqlite":
             self.trace_store = SQLiteTraceStore(self.trace_db_file)
         else:

@@ -4,6 +4,7 @@ These tests cover import/install health, trace persistence, strategy patching,
 real config rollback, and the optional Yijing policy router.
 """
 import json
+import gzip
 import multiprocessing
 import tempfile
 from datetime import datetime, timedelta
@@ -380,6 +381,99 @@ def test_trace_store_skips_corrupt_jsonl_lines(tmp_path: Path):
 
     rows = JsonlTraceStore(traces_file).load(agent_id="ok")
     assert len(rows) == 2
+
+
+def test_jsonl_trace_store_rotates_by_size(tmp_path: Path):
+    traces_file = tmp_path / "traces.jsonl"
+    archive_dir = tmp_path / "archives"
+    store = JsonlTraceStore(traces_file, max_bytes=1, archive_dir=archive_dir)
+
+    store.append({
+        "agent_id": "rotating-agent",
+        "task": "first",
+        "success": True,
+        "timestamp": "2026-04-25T00:00:00",
+    })
+    store.append({
+        "agent_id": "rotating-agent",
+        "task": "second",
+        "success": True,
+        "timestamp": "2026-04-25T00:00:01",
+    })
+
+    archives = sorted(archive_dir.glob("*.gz"))
+    assert len(archives) == 1
+    with gzip.open(archives[0], "rt", encoding="utf-8") as f:
+        archived_rows = [json.loads(line) for line in f if line.strip()]
+
+    assert [row["task"] for row in archived_rows] == ["first"]
+    assert [row["task"] for row in store.load()] == ["second"]
+
+
+def test_jsonl_trace_store_prunes_old_archives(tmp_path: Path):
+    traces_file = tmp_path / "traces.jsonl"
+    archive_dir = tmp_path / "archives"
+    store = JsonlTraceStore(
+        traces_file,
+        max_bytes=1,
+        archive_dir=archive_dir,
+        max_archives=1,
+    )
+
+    for i in range(3):
+        store.append({
+            "agent_id": "prune-agent",
+            "task": f"task-{i}",
+            "success": True,
+            "timestamp": f"2026-04-25T00:00:0{i}",
+        })
+
+    archives = sorted(archive_dir.glob("*.gz"))
+    assert len(archives) == 1
+    with gzip.open(archives[0], "rt", encoding="utf-8") as f:
+        archived_rows = [json.loads(line) for line in f if line.strip()]
+
+    assert [row["task"] for row in archived_rows] == ["task-1"]
+    assert [row["task"] for row in store.load()] == ["task-2"]
+
+
+def test_jsonl_trace_store_compacts_to_latest_entries(tmp_path: Path):
+    traces_file = tmp_path / "traces.jsonl"
+    store = JsonlTraceStore(traces_file)
+    for i in range(5):
+        store.append({
+            "agent_id": "compact-agent",
+            "task": f"task-{i}",
+            "success": True,
+            "timestamp": f"2026-04-25T00:00:0{i}",
+        })
+
+    removed = store.compact(max_entries=2)
+
+    assert removed == 3
+    assert [row["task"] for row in store.load()] == ["task-3", "task-4"]
+
+
+def test_loop_exposes_jsonl_rotation_options(tmp_path: Path):
+    loop = SelfImprovingLoop(
+        data_dir=str(tmp_path),
+        jsonl_max_bytes=1,
+        jsonl_archive_dir=str(tmp_path / "archives"),
+    )
+
+    loop.execute_with_improvement(
+        agent_id="loop-rotation-agent",
+        task="first",
+        execute_fn=lambda: "ok",
+    )
+    loop.execute_with_improvement(
+        agent_id="loop-rotation-agent",
+        task="second",
+        execute_fn=lambda: "ok",
+    )
+
+    assert list((tmp_path / "archives").glob("*.gz"))
+    assert [row["task"] for row in loop.trace_store.load()] == ["second"]
 
 
 def test_sqlite_trace_store_round_trip_and_agent_filter(tmp_path: Path):

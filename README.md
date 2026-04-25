@@ -190,6 +190,23 @@ This writes `traces.sqlite3` with WAL mode enabled. The public API is unchanged:
 `execute_with_improvement()` records traces, and the loop reads them back for
 thresholds, metrics, and rollback checks.
 
+For long-running JSONL deployments, enable size-based rotation and call
+compaction from cron or your scheduler:
+
+```python
+loop = SelfImprovingLoop(
+    storage="jsonl",
+    jsonl_max_bytes=50 * 1024 * 1024,
+    jsonl_max_archives=7,
+)
+
+# Keep the latest 100k valid active traces.
+loop.trace_store.compact(max_entries=100_000)
+```
+
+Rotated JSONL files are gzipped under `trace_archives/` by default. Compaction
+drops corrupt rows and keeps the latest valid entries in the active trace file.
+
 ---
 
 ## Optional Yijing policy strategy
