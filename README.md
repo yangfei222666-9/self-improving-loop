@@ -384,6 +384,15 @@ The wrapper adds a stable **~300 μs of fixed cost per call** (trace append + th
 
 Rerun the benchmark on your own machine with `python benchmarks/overhead.py`.
 
+Restart / recovery startup cost can be checked with:
+
+```bash
+python benchmarks/startup_recovery.py --traces 1000 10000 100000
+```
+
+`SelfImprovingLoop.__init__` only loads `loop_state.json`; trace history is
+loaded on demand for stats, thresholds, and rollback checks.
+
 Separate operation costs (triggered occasionally, not per-call):
 
 | Operation | Cost |

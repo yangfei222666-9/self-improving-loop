@@ -258,6 +258,141 @@ def test_strategy_apply_exception_records_error_not_fake_improvement(tmp_path: P
     assert "apply hook failed" in error["error"]
 
 
+def test_state_and_trace_stats_survive_process_restart(tmp_path: Path):
+    agent_id = "restart-stats-agent"
+    loop = SelfImprovingLoop(data_dir=str(tmp_path))
+
+    outcomes = [True, True, False, True, False]
+    for index, ok in enumerate(outcomes):
+        loop.execute_with_improvement(
+            agent_id=agent_id,
+            task=f"restart task {index}",
+            execute_fn=(
+                (lambda: "ok")
+                if ok
+                else (lambda: (_ for _ in ()).throw(RuntimeError("planned failure")))
+            ),
+        )
+
+    restarted = SelfImprovingLoop(data_dir=str(tmp_path))
+    stats = restarted.get_improvement_stats(agent_id)
+    metrics = restarted._calculate_metrics(agent_id)
+
+    assert stats["total_tasks"] == len(outcomes)
+    assert stats["rollback_count"] == 0
+    assert metrics["total_tasks"] == len(outcomes)
+    assert metrics["success_rate"] == pytest.approx(3 / 5)
+
+
+def test_trace_only_crash_recovery_can_still_trigger_improvement(tmp_path: Path):
+    agent_id = "trace-only-crash-agent"
+    loop = SelfImprovingLoop(data_dir=str(tmp_path))
+    for index in range(2):
+        loop._record_trace(
+            agent_id=agent_id,
+            task=f"pre-crash failure {index}",
+            success=False,
+            duration=0.01,
+            error="crash-window failure",
+            context=None,
+        )
+
+    # Simulate losing in-memory process state after trace append. The restarted
+    # loop should still make decisions from persisted traces, not stale memory.
+    restarted = SelfImprovingLoop(data_dir=str(tmp_path))
+    restarted.adaptive_threshold.set_manual_threshold(
+        agent_id,
+        failure_threshold=2,
+        analysis_window_hours=24,
+        cooldown_hours=0,
+    )
+
+    assert restarted._should_trigger_improvement(agent_id) is True
+
+
+def test_rollback_history_continues_across_restarts(tmp_path: Path):
+    class Adapter:
+        def __init__(self):
+            self.restored = []
+
+        def get_config(self, agent_id):
+            return {"mode": "baseline"}
+
+        def apply_config(self, agent_id, config_patch):
+            return True
+
+        def rollback_config(self, agent_id, backup_config):
+            self.restored.append((agent_id, dict(backup_config)))
+
+    agent_id = "restart-rollback-agent"
+    loop = SelfImprovingLoop(data_dir=str(tmp_path), config_adapter=Adapter())
+    improvement_id = "improvement-restart-rollback"
+    backup_id = loop.auto_rollback.backup_config(
+        agent_id=agent_id,
+        config={"mode": "baseline"},
+        improvement_id=improvement_id,
+    )
+    loop.state.setdefault("backups", {})[agent_id] = {
+        "backup_id": backup_id,
+        "improvement_id": improvement_id,
+        "improved_at": datetime.now().isoformat(),
+        "before_metrics": {
+            "success_rate": 1.0,
+            "avg_duration_sec": 0.01,
+            "consecutive_failures": 0,
+            "total_tasks": 10,
+        },
+    }
+    loop._save_state()
+
+    for index in range(loop.auto_rollback.VERIFICATION_WINDOW):
+        loop._record_trace(
+            agent_id=agent_id,
+            task=f"post-restart regression {index}",
+            success=False,
+            duration=0.01,
+            error="regression",
+            context=None,
+        )
+
+    restarted = SelfImprovingLoop(data_dir=str(tmp_path), config_adapter=Adapter())
+    rollback_result = restarted.check_and_rollback(agent_id)
+
+    assert rollback_result is not None
+    assert rollback_result["success"] is True
+
+    after_restart = SelfImprovingLoop(data_dir=str(tmp_path))
+    stats = after_restart.get_improvement_stats(agent_id)
+    history = stats["rollback_history"]
+
+    assert stats["rollback_count"] == 1
+    assert history[-1]["backup_id"] == backup_id
+    assert history[-1]["improvement_id"] == improvement_id
+
+
+def test_loop_init_does_not_eager_load_trace_history(tmp_path: Path, monkeypatch):
+    traces_file = tmp_path / "traces.jsonl"
+    traces_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(traces_file, "w", encoding="utf-8") as f:
+        for index in range(1000):
+            f.write(json.dumps({
+                "agent_id": "large-restart-agent",
+                "task": f"task-{index}",
+                "success": True,
+                "duration_sec": 0.01,
+                "timestamp": "2026-04-26T00:00:00",
+            }) + "\n")
+
+    def fail_if_loaded(*args, **kwargs):
+        raise AssertionError("SelfImprovingLoop.__init__ must not eager-load traces")
+
+    monkeypatch.setattr(JsonlTraceStore, "load", fail_if_loaded)
+
+    loop = SelfImprovingLoop(data_dir=str(tmp_path))
+
+    assert loop.state == {}
+
+
 def test_config_adapter_applies_and_restores_real_config(tmp_path: Path):
     class Strategy:
         def __init__(self):

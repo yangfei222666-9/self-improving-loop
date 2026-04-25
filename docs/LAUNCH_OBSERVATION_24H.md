@@ -58,6 +58,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | 2026-04-26 03:09 | GitHub Issues | Closed #3 after CI success across Python 3.9-3.12 on Ubuntu/macOS/Windows | CI run `24938413094`; `gh issue close 3`; open issues now 3 | Broad exception audit is closed; ordinary agent exceptions remain captured, operator/process interrupts propagate | Next P0 candidate is #4 structured logging |
 | 2026-04-26 03:15 | GitHub Issues | Implemented #4 stdlib logging route: `_log()` now emits through `logging`, keeps default JSONL `loop.log`, and propagates to user handlers | `pytest -q` = 55 passed; `compileall`; isolated `python -m build`; `twine check dist/*`; clean wheel install logging smoke | Removes ad-hoc direct log writes while preserving the old file sink for no-config users | Push, wait CI, then close #4 if green |
 | 2026-04-26 03:18 | GitHub Issues | Closed #4 after CI success across Python 3.9-3.12 on Ubuntu/macOS/Windows | CI run `24938568117`; `gh issue close 4`; open issues now 2 | Logging is now stdlib-routable without breaking default JSONL event flow | Next reliability issue is #6 state recovery after process restart |
+| 2026-04-26 03:27 | GitHub Issues | Implemented #6 restart recovery coverage: state/stat continuity, trace-only crash recovery, rollback-history persistence, no eager trace load on init, and startup benchmark script | `pytest -q` = 59 passed; `compileall`; `benchmarks/startup_recovery.py --traces 1000 10000 100000` | Makes restart behavior auditable instead of assumed; 100k traces init measured under 1 ms locally, on-demand stats/metrics remain the cost center | Push, wait CI, then close #6 if green |
 
 ---
 
@@ -68,7 +69,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | DONE | Capture canonical X post URL | Codex via Computer Use | https://x.com/jiuxiao79/status/2048043783431021014 |
 | TODO | Re-check GitHub stars / forks / release downloads at +6h | Codex | Append snapshot row |
 | TODO | Re-check GitHub stars / forks / release downloads at +24h | Codex | Append final 24h row |
-| TODO | Use corrected `55 tests` count in future launch copy | Codex | No new post repeats stale test-count drift |
+| TODO | Use corrected `59 tests` count in future launch copy | Codex | No new post repeats stale test-count drift |
 | TODO | If someone asks for integration, add one adapter example before changing positioning | Codex | New issue/comment or X reply asks for LangGraph/CrewAI/AutoGen/MCP |
 | HOLD | Do not rewrite README positioning during the 24h window without external evidence | Codex | Only unlock if a real user misunderstands a specific claim |
 

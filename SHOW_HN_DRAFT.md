@@ -67,7 +67,7 @@ Extracted from a larger project (TaijiOS, started on Chinese New Year
 enough to spin out.
 
 Honest caveats:
-  - 0.1.1. Smoke-tested (45 tests), but real-world battle testing is
+  - 0.1.1. Smoke-tested (59 tests), but real-world battle testing is
     ongoing. Bug reports very welcome.
   - The analysis_failure() step is statistical, not LLM-based. If you want
     LLM-authored config tweaks, subclass it.
