@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, Any, Callable, Optional
 
+from .adapters import ConfigAdapter
 from .rollback import AutoRollback
 from .threshold import AdaptiveThreshold
 from .notifier import TelegramNotifier
@@ -25,6 +26,7 @@ class SelfImprovingLoop:
         data_dir: str = None,
         notifier: Optional[TelegramNotifier] = None,
         improvement_strategy: Optional[Any] = None,
+        config_adapter: Optional[ConfigAdapter] = None,
     ):
         """
         Args:
@@ -35,9 +37,12 @@ class SelfImprovingLoop:
                 email / etc. Defaults to a stdout-logging stub.
             improvement_strategy: optional duck-typed strategy with
                 ``analyze(agent_id=..., traces=..., before_metrics=...)``,
-                ``apply(agent_id=..., config_patch=...)``, and optionally
-                ``rollback(agent_id=..., backup_config=...)``. Without it the
-                loop tracks and triggers, but does not pretend to mutate config.
+                and, for legacy compatibility, optional ``apply`` /
+                ``current_config`` / ``rollback`` methods. Without it the loop
+                tracks and triggers, but does not pretend to mutate config.
+            config_adapter: optional ConfigAdapter that owns real config IO:
+                ``get_config`` before a patch, ``apply_config`` for guarded
+                changes, and ``rollback_config`` when regression is detected.
         """
         if data_dir is None:
             data_dir = Path.home() / ".self-improving-loop" / "data"
@@ -49,6 +54,7 @@ class SelfImprovingLoop:
         self.adaptive_threshold = AdaptiveThreshold(str(self.data_dir))
         self.notifier = notifier or TelegramNotifier(enabled=True)
         self.improvement_strategy = improvement_strategy
+        self.config_adapter = config_adapter
         # alias for the README-facing name
         self.rollback = self.auto_rollback
 
@@ -220,26 +226,14 @@ class SelfImprovingLoop:
 
             if config_patch:
                 try:
-                    current_config_fn = getattr(
-                        self.improvement_strategy,
-                        "current_config",
-                        None,
-                    )
-                    current_config = (
-                        current_config_fn(agent_id=agent_id)
-                        if current_config_fn is not None
-                        else {}
-                    )
+                    current_config = self._get_current_config(agent_id)
                     backup_id = self.auto_rollback.backup_config(
                         agent_id=agent_id,
                         config=current_config,
                         improvement_id=improvement_id,
                     )
 
-                    applied = self.improvement_strategy.apply(
-                        agent_id=agent_id,
-                        config_patch=config_patch,
-                    )
+                    applied = self._apply_config_patch(agent_id, config_patch)
                     if applied is not False:
                         applied_count = 1
                         self.state.setdefault("backups", {})[agent_id] = {
@@ -257,6 +251,53 @@ class SelfImprovingLoop:
         self._save_state()
 
         return applied_count
+
+    def _get_current_config(self, agent_id: str) -> Dict[str, Any]:
+        """Read the current config through the strongest available contract."""
+        if self.config_adapter is not None:
+            return dict(self.config_adapter.get_config(agent_id=agent_id))
+
+        current_config_fn = getattr(self.improvement_strategy, "current_config", None)
+        if current_config_fn is None:
+            return {}
+        return dict(current_config_fn(agent_id=agent_id))
+
+    def _apply_config_patch(self, agent_id: str, config_patch: Dict[str, Any]) -> Any:
+        """Apply a patch through ConfigAdapter, falling back to legacy strategy."""
+        if self.config_adapter is not None:
+            return self.config_adapter.apply_config(
+                agent_id=agent_id,
+                config_patch=config_patch,
+            )
+
+        apply_fn = getattr(self.improvement_strategy, "apply", None)
+        if apply_fn is None:
+            self._log("warn", "improvement_strategy 缺少 apply，无法应用 config_patch")
+            return False
+        return apply_fn(agent_id=agent_id, config_patch=config_patch)
+
+    def _restore_config(self, agent_id: str, backup_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Restore a backed-up config; never silently claim success."""
+        if self.config_adapter is not None:
+            self.config_adapter.rollback_config(
+                agent_id=agent_id,
+                backup_config=backup_config,
+            )
+            return {"restore_applied": True, "restore_source": "config_adapter"}
+
+        restore_fn = getattr(self.improvement_strategy, "rollback", None)
+        if restore_fn is None:
+            return {
+                "restore_applied": False,
+                "restore_source": "none",
+                "error": "No config_adapter.rollback_config or improvement_strategy.rollback hook configured",
+            }
+
+        restore_fn(
+            agent_id=agent_id,
+            backup_config=backup_config,
+        )
+        return {"restore_applied": True, "restore_source": "improvement_strategy"}
 
     def check_and_rollback(self, agent_id: str) -> Optional[Dict]:
         """检查是否需要回滚，如果需要则执行"""
@@ -291,24 +332,35 @@ class SelfImprovingLoop:
             )
 
             if result["success"]:
-                restore_fn = getattr(self.improvement_strategy, "rollback", None)
-                if restore_fn is not None:
-                    try:
-                        restore_fn(
-                            agent_id=agent_id,
-                            backup_config=result.get("config", {}),
-                        )
-                    except Exception as e:
-                        self._log("error", f"improvement_strategy.rollback 失败: {e}")
-                        return {
-                            "agent_id": agent_id,
-                            "reason": reason,
-                            "before_metrics": before_metrics,
-                            "after_metrics": after_metrics,
-                            "backup_id": backup_info["backup_id"],
-                            "success": False,
-                            "error": str(e),
-                        }
+                try:
+                    restore_result = self._restore_config(
+                        agent_id=agent_id,
+                        backup_config=result.get("config", {}),
+                    )
+                except Exception as e:
+                    self._log("error", f"config restore 失败: {e}")
+                    return {
+                        "agent_id": agent_id,
+                        "reason": reason,
+                        "before_metrics": before_metrics,
+                        "after_metrics": after_metrics,
+                        "backup_id": backup_info["backup_id"],
+                        "success": False,
+                        "restore_applied": False,
+                        "error": str(e),
+                    }
+
+                if not restore_result.get("restore_applied"):
+                    self._log("error", f"回滚判定已记录，但未执行真实配置恢复: {restore_result.get('error')}")
+                    return {
+                        "agent_id": agent_id,
+                        "reason": reason,
+                        "before_metrics": before_metrics,
+                        "after_metrics": after_metrics,
+                        "backup_id": backup_info["backup_id"],
+                        "success": False,
+                        **restore_result,
+                    }
 
                 self._log("success", f"回滚成功: {agent_id}")
 
@@ -322,7 +374,9 @@ class SelfImprovingLoop:
                     "reason": reason,
                     "before_metrics": before_metrics,
                     "after_metrics": after_metrics,
-                    "backup_id": backup_info["backup_id"]
+                    "backup_id": backup_info["backup_id"],
+                    "success": True,
+                    **restore_result,
                 }
 
         return None

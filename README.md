@@ -1,6 +1,6 @@
 # self-improving-loop
 
-> A safety-first self-improvement loop for AI agents:
+> A rollback-first reliability layer for AI agents:
 > **execute → track → analyze → strategy-apply → rollback on regression.**
 
 [![PyPI](https://img.shields.io/badge/pypi-0.1.0-blue.svg)](https://pypi.org/project/self-improving-loop/)
@@ -14,7 +14,8 @@ Wrap any function, get:
 
 - 📊 **Automatic execution tracking** (success rate, latency, rolling window)
 - 🧠 **Adaptive thresholds** per agent profile (high-freq / mid-freq / low-freq / critical)
-- 🛠 **Strategy hook** for applying improvement configs when failure patterns are detected
+- 🛠 **Strategy hook** for proposing improvement configs when failure patterns are detected
+- 🧩 **ConfigAdapter contract** for real config backup / patch / restore
 - 🛡 **Rollback trigger** when the new config regresses (>10% success drop, >20% latency gain, or 5 consecutive failures)
 - 📬 **Pluggable notifier** (stub by default — swap in Telegram / Slack / whatever)
 
@@ -56,7 +57,9 @@ if result["rollback_executed"]:
     print(f"Rolled back because: {result['rollback_executed']['reason']}")
 ```
 
-That's it. The loop watches every execution, decides when to trigger tuning, and can undo tunings that made things worse when you provide a strategy hook.
+That's it. The loop watches every execution and decides when to trigger tuning.
+To mutate and restore real agent config, provide a strategy hook plus either a
+`ConfigAdapter` or the legacy strategy `current_config/apply/rollback` methods.
 
 ---
 
@@ -166,6 +169,32 @@ When a config change ships, the loop keeps watching. It rolls back if **any** of
 - Success rate drops >10%
 - Average latency increases >20%
 - ≥5 consecutive failures after the change
+
+Real rollback requires a config hook. Prefer an explicit `ConfigAdapter`:
+
+```python
+from self_improving_loop import SelfImprovingLoop
+
+class MyConfigAdapter:
+    def get_config(self, agent_id):
+        return load_agent_config(agent_id)
+
+    def apply_config(self, agent_id, config_patch):
+        save_agent_config(agent_id, {**load_agent_config(agent_id), **config_patch})
+        return True
+
+    def rollback_config(self, agent_id, backup_config):
+        save_agent_config(agent_id, backup_config)
+
+loop = SelfImprovingLoop(
+    improvement_strategy=my_strategy,
+    config_adapter=MyConfigAdapter(),
+)
+```
+
+Without a config adapter or strategy rollback hook, the loop will record the
+rollback decision but will not claim that your external agent config was
+restored.
 
 ```python
 # See recent rollbacks

@@ -15,6 +15,7 @@ from self_improving_loop import (
     SelfImprovingLoop,
     AutoRollback,
     AdaptiveThreshold,
+    ConfigAdapter,
     TelegramNotifier,
     __version__,
 )
@@ -43,6 +44,7 @@ def test_version_is_set():
 def test_imports_resolve():
     # If any of these blow up, the package is broken at install-time
     assert SelfImprovingLoop
+    assert ConfigAdapter
     assert AutoRollback
     assert AdaptiveThreshold
     assert TelegramNotifier
@@ -96,6 +98,91 @@ def test_improvement_strategy_hook_applies_and_records_backup(tmp_path: Path):
     assert result["improvement_applied"] == 1
     assert strategy.applied == [("strategy-agent", {"timeout_sec": 45})]
     assert "strategy-agent" in loop.state["backups"]
+
+
+def test_config_adapter_applies_and_restores_real_config(tmp_path: Path):
+    class Strategy:
+        def __init__(self):
+            self.proposed = False
+
+        def analyze(self, agent_id, traces, before_metrics):
+            if self.proposed:
+                return None
+            self.proposed = True
+            return {"mode": "broken"}
+
+    class Adapter:
+        def __init__(self):
+            self.config = {"mode": "baseline", "timeout_sec": 30}
+            self.restored = False
+
+        def get_config(self, agent_id):
+            return dict(self.config)
+
+        def apply_config(self, agent_id, config_patch):
+            self.config.update(config_patch)
+            return True
+
+        def rollback_config(self, agent_id, backup_config):
+            self.config = dict(backup_config)
+            self.restored = True
+
+    adapter = Adapter()
+    loop = SelfImprovingLoop(
+        data_dir=str(tmp_path),
+        improvement_strategy=Strategy(),
+        config_adapter=adapter,
+    )
+    loop.adaptive_threshold.set_manual_threshold(
+        "adapter-agent",
+        failure_threshold=1,
+        analysis_window_hours=24,
+        cooldown_hours=0,
+        is_critical=True,
+    )
+
+    def agent_call():
+        if adapter.config["mode"] == "broken":
+            raise RuntimeError("bad config")
+        return {"ok": True}
+
+    loop.execute_with_improvement(
+        agent_id="adapter-agent",
+        task="baseline pass",
+        execute_fn=agent_call,
+    )
+    loop.execute_with_improvement(
+        agent_id="adapter-agent",
+        task="seed failure",
+        execute_fn=lambda: (_ for _ in ()).throw(RuntimeError("seed")),
+    )
+    assert adapter.config["mode"] == "broken"
+
+    loop.adaptive_threshold.set_manual_threshold(
+        "adapter-agent",
+        failure_threshold=999,
+        analysis_window_hours=24,
+        cooldown_hours=0,
+        is_critical=True,
+    )
+
+    rollback_result = None
+    for i in range(10):
+        result = loop.execute_with_improvement(
+            agent_id="adapter-agent",
+            task=f"post-patch regression {i}",
+            execute_fn=agent_call,
+        )
+        if result["rollback_executed"]:
+            rollback_result = result["rollback_executed"]
+            break
+
+    assert rollback_result is not None
+    assert rollback_result["success"] is True
+    assert rollback_result["restore_applied"] is True
+    assert rollback_result["restore_source"] == "config_adapter"
+    assert adapter.restored is True
+    assert adapter.config == {"mode": "baseline", "timeout_sec": 30}
 
 
 def test_execute_with_improvement_records_success(tmp_path: Path):
