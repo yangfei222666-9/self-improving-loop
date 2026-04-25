@@ -53,6 +53,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | 2026-04-26 02:31 | GitHub Issues | Closed #7 cross-platform verification and #9 examples; narrowed #8 to publish workflow + pre-commit; open issues now 6 | `gh issue close 7`, `gh issue close 9`, `gh issue edit 8`, `gh issue list` | Removed stale readiness blockers without hiding remaining infra work | Next P0 issue is #1 concurrency file locking |
 | 2026-04-26 02:51 | GitHub Issues | Closed #1 after verifying JSONL sidecar lock, multiprocessing append test, 45 tests, wheel/sdist build, and twine check | `gh issue close 1`, `pytest -q`, `python -m build`, `twine check dist/*` | Removed stale high-priority production blocker; open issues now 5 | Next P0 issue is #2 trace rotation / compaction |
 | 2026-04-26 02:59 | GitHub Issues | Implemented #2 JSONL rotation / compaction: gzip archives, `max_archives`, public loop config, and `compact(max_entries=...)` | `pytest -q` = 49 passed; `compileall`; isolated `python -m build`; `twine check dist/*`; clean wheel install smoke | Removes week-1 production disk-growth blocker for JSONL users while keeping SQLite path unchanged | Push, wait CI, then close #2 if green |
+| 2026-04-26 03:02 | GitHub Issues | Closed #2 after CI success across Python 3.9-3.12 on Ubuntu/macOS/Windows | CI run `24938273677`; `gh issue close 2`; open issues now 4 | Disk-growth blocker is no longer open; JSONL users have rotation, archive pruning, and manual compaction | Next P0 candidate is #3 broad exception audit |
 
 ---
 
