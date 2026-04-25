@@ -55,12 +55,12 @@ Things I wanted it to be:
   - adaptive per agent — a critical alerting agent shouldn't have the same
     failure tolerance as a batch classifier
 
-Extracted from a larger project (TaijiOS — an AI operating system I've been
-building solo for 60 days with heavy AI-collab). This piece felt general
-enough to spin out.
+Extracted from a larger project (TaijiOS — an AI operating system started on
+Chinese New Year 2026-02-17 and built with heavy AI collaboration). This piece
+felt general enough to spin out.
 
 Honest caveats:
-  - 0.1.0. Smoke-tested (36 tests), but real-world battle testing is
+  - 0.1.0. Smoke-tested (38 tests), but real-world battle testing is
     ongoing. Bug reports very welcome.
   - The analysis_failure() step is statistical, not LLM-based. If you want
     LLM-authored config tweaks, subclass it.
@@ -100,6 +100,9 @@ pass an `improvement_strategy` object and call your model inside its
 `analyze()` method. The base stays LLM-free.
 
 Happy to answer anything.
+
+MIT licensed: copy pieces into your own loop if useful; just keep the license
+notice with redistributed code.
 ```
 
 ---
@@ -108,10 +111,11 @@ Happy to answer anything.
 
 - [ ] README has at least one screenshot or asciinema (ideally: a 30-second demo showing rollback firing)
 - [ ] `pip install self-improving-loop` actually works from PyPI (upload wheel + sdist first)
+- [ ] TestPyPI dry-run works before production PyPI release
 - [ ] GitHub repo description is set (use the PyPI one-liner)
 - [ ] Topics set: `ai-agents`, `self-improving`, `feedback-loop`, `python`, `llm`, `autonomous-agents`
 - [ ] CHANGELOG.md with 0.1.0 entry
-- [ ] `tests/` passes (currently 36/36)
+- [ ] `tests/` passes (currently 38/38)
 - [ ] LICENSE file in repo root (MIT, already there)
 - [ ] Sanity-run: `python -c "from self_improving_loop import SelfImprovingLoop; SelfImprovingLoop()"`
 
@@ -125,6 +129,13 @@ Replies to prepare:
 - "Is this just a retry wrapper?" → Retry is one failure; this is behavior-drift detection across a window.
 - "What's the 346-heartbeat claim from the parent project?" → That's TaijiOS's Ising Heartbeat experiment, not this library. Read about it at [TaijiOS repo].
 - Anyone mentioning OpenClaw → "TaijiOS runs on OpenClaw but this package is platform-agnostic."
+
+First 24h operating rule:
+
+- Refresh comments every 15 minutes for the first 6 hours.
+- Respond to substantive criticism within 30 minutes if awake.
+- Do not get defensive; convert criticism into issues or README fixes.
+- If a real bug is reported, acknowledge it, patch, release, then reply with the fix link.
 
 ---
 

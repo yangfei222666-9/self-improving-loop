@@ -68,6 +68,18 @@ def test_loop_instantiates_with_tempdir(tmp_path: Path):
     assert loop.rollback is loop.auto_rollback
 
 
+def test_track_alias_records_success(tmp_path: Path):
+    loop = SelfImprovingLoop(data_dir=str(tmp_path))
+    result = loop.track(
+        agent_id="alias-agent",
+        task="alias task",
+        execute_fn=lambda: "ok",
+    )
+
+    assert result["success"] is True
+    assert result["result"] == "ok"
+
+
 def test_loop_supports_sqlite_trace_storage(tmp_path: Path):
     loop = SelfImprovingLoop(data_dir=str(tmp_path), storage="sqlite")
     assert loop.storage == "sqlite"
@@ -335,6 +347,14 @@ def test_yijing_strategy_returns_bounded_policy_patch():
     assert patch["policy_action"] == "conserve_and_rollback_bias"
     assert patch["auto_apply_enabled"] is False
     assert len(patch["dimensions"]) == 6
+
+
+def test_cli_version_outputs_version(capsys):
+    from self_improving_loop.cli import main
+
+    assert main(["--version"]) == 0
+    captured = capsys.readouterr()
+    assert "self-improving-loop 0.1.0" in captured.out
 
 
 def test_execute_with_improvement_captures_failure(tmp_path: Path):

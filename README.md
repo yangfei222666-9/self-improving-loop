@@ -3,12 +3,15 @@
 > A rollback-first reliability layer for AI agents:
 > **execute → track → analyze → strategy-apply → rollback on regression.**
 
-[![PyPI](https://img.shields.io/badge/pypi-0.1.0-blue.svg)](https://pypi.org/project/self-improving-loop/)
+[![PyPI](https://img.shields.io/pypi/v/self-improving-loop.svg)](https://pypi.org/project/self-improving-loop/)
+[![CI](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml/badge.svg)](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
-[![Overhead](https://img.shields.io/badge/overhead-%3C1%25-brightgreen)](#performance)
+[![LLM overhead](https://img.shields.io/badge/LLM%20overhead-%3C1%25-brightgreen)](#performance)
 
 Most "self-improving agent" projects stop at *"log the failures, let the next run read the log"*. That's a methodology, not a loop. **This package is the loop, implemented as a compact pure-stdlib Python runtime** — no framework lock-in, no LLM dependency, no cloud.
+
+Overhead is negligible for normal LLM/HTTP agent calls; for sub-10ms in-memory functions, measure before wrapping.
 
 Wrap any function, get:
 
@@ -21,7 +24,7 @@ Wrap any function, get:
 - 🛡 **Rollback trigger** when the new config regresses (>10% success drop, >20% latency gain, or 5 consecutive failures)
 - 📬 **Pluggable notifier** (stub by default — swap in Telegram / Slack / whatever)
 
-Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji), where it survived a 346-heartbeat Ising physics experiment and production-scale agent workloads.
+Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji), which includes a 346-heartbeat Ising experiment and production-scale agent workloads.
 
 ---
 
@@ -33,6 +36,14 @@ pip install self-improving-loop
 
 Zero required dependencies. Everything is Python stdlib, including optional
 SQLite trace storage via `sqlite3`.
+
+---
+
+## Not a...
+
+- **...methodology doc.** Many "self-improving agent" repos are markdown templates that ask *you* to log learnings to `CLAUDE.md`. This is the runtime loop that does it for you.
+- **...heavyweight framework.** Compact stdlib code. Drop it next to your existing code. No decorators forced on you. No background process.
+- **...LLM-dependent.** The analysis is statistical, not LLM-based. If you want LLM-authored config tweaks, pass an `improvement_strategy` object and ask your favorite LLM inside its `analyze()` method.
 
 ---
 
@@ -90,7 +101,7 @@ To mutate and restore real agent config, provide a strategy hook plus either a
 
 ## Run the four useful examples
 
-Start here:
+From a repo checkout, start here:
 
 ```bash
 python examples/01_basic_tracking.py
@@ -127,6 +138,8 @@ result = loop.execute_with_improvement(
     context={"framework": "your-current-stack"},
 )
 ```
+
+`loop.track(...)` is also available as a shorter alias for the same API.
 
 Dependency-free examples show the integration seam:
 
@@ -210,6 +223,8 @@ Most agents have this failure mode:
 ## Adaptive thresholds (no magic numbers)
 
 Different agents have different "pulse rates". A critical alerting agent should reconsider after 1 failure; a batch classifier can tolerate 5 before triggering analysis. The library classifies agents by execution frequency and adjusts:
+
+The automatic profile is based on `exec_count_24h`; override it with `set_manual_threshold()` when production semantics matter more than raw frequency.
 
 | Agent profile | Failure trigger | Analysis window | Cooldown |
 |---|---|---|---|
@@ -327,19 +342,11 @@ Separate operation costs (triggered occasionally, not per-call):
 
 ---
 
-## Not a...
-
-- **...methodology doc.** Many "self-improving agent" repos are markdown templates that ask *you* to log learnings to `CLAUDE.md`. This is the runtime loop that does it for you.
-- **...heavyweight framework.** Compact stdlib code. Drop it next to your existing code. No decorators forced on you. No background process.
-- **...LLM-dependent.** The analysis is statistical, not LLM-based. If you want LLM-authored config tweaks, pass an `improvement_strategy` object and ask your favorite LLM inside its `analyze()` method.
-
----
-
 ## Background
 
 Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji) — a self-learning AI operating system with 5 *I Ching*–bound engines and a 346-heartbeat Ising physics experiment. The parent project has 14 modules; this one is the most generally reusable, so it lives as a standalone package.
 
-TaijiOS was built through multi-AI collaboration starting on **Chinese New Year 2026-02-17** (60 days before this release).
+TaijiOS started on **Chinese New Year 2026-02-17** and has been built through multi-AI collaboration since then.
 
 ---
 

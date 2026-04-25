@@ -165,6 +165,21 @@ class SelfImprovingLoop:
             "rollback_executed": rollback_executed
         }
 
+    def track(
+        self,
+        agent_id: str,
+        task: str,
+        execute_fn: Callable[[], Any],
+        context: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
+        """Short alias for ``execute_with_improvement``."""
+        return self.execute_with_improvement(
+            agent_id=agent_id,
+            task=task,
+            execute_fn=execute_fn,
+            context=context,
+        )
+
     def _record_trace(self, agent_id: str, task: str, success: bool, 
                      duration: float, error: str = None, context: Dict = None):
         """记录任务追踪"""
