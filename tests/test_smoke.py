@@ -6,6 +6,7 @@ real config rollback, and the optional Yijing policy router.
 import json
 import gzip
 import multiprocessing
+import logging
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -601,6 +602,41 @@ def test_loop_exposes_jsonl_rotation_options(tmp_path: Path):
 
     assert list((tmp_path / "archives").glob("*.gz"))
     assert [row["task"] for row in loop.trace_store.load()] == ["second"]
+
+
+def test_loop_logging_keeps_default_jsonl_sink(tmp_path: Path):
+    loop = SelfImprovingLoop(data_dir=str(tmp_path))
+
+    loop._log("success", "structured log event")
+
+    rows = [
+        json.loads(line)
+        for line in (tmp_path / "loop.log").read_text(encoding="utf-8").splitlines()
+    ]
+    assert rows[-1]["level"] == "success"
+    assert rows[-1]["message"] == "structured log event"
+    assert rows[-1]["logger"].startswith("self_improving_loop.loop.")
+
+
+def test_loop_logging_propagates_to_stdlib_handlers(tmp_path: Path):
+    records = []
+
+    class ListHandler(logging.Handler):
+        def emit(self, record):
+            records.append(record)
+
+    package_logger = logging.getLogger("self_improving_loop")
+    handler = ListHandler()
+    package_logger.addHandler(handler)
+    package_logger.setLevel(logging.INFO)
+    try:
+        loop = SelfImprovingLoop(data_dir=str(tmp_path))
+        loop._log("warn", "routed warning")
+    finally:
+        package_logger.removeHandler(handler)
+
+    assert [record.getMessage() for record in records] == ["routed warning"]
+    assert getattr(records[0], "taiji_level") == "warn"
 
 
 def test_sqlite_trace_store_round_trip_and_agent_filter(tmp_path: Path):

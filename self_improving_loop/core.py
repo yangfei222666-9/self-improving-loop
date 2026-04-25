@@ -5,6 +5,7 @@ Self-Improving Loop - Core
 """
 
 import json
+import logging
 import time
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -16,6 +17,32 @@ from .threshold import AdaptiveThreshold
 from .notifier import TelegramNotifier
 from .time_utils import parse_trace_timestamp
 from .trace_store import JsonlTraceStore, SQLiteTraceStore
+
+
+logger = logging.getLogger("self_improving_loop")
+logger.addHandler(logging.NullHandler())
+
+
+class JsonlLogHandler(logging.Handler):
+    """Minimal stdlib logging handler that preserves the old JSONL log sink."""
+
+    def __init__(self, path: Path):
+        super().__init__()
+        self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            entry = {
+                "timestamp": datetime.fromtimestamp(record.created).isoformat(),
+                "level": getattr(record, "taiji_level", record.levelname.lower()),
+                "logger": record.name,
+                "message": record.getMessage(),
+            }
+            with open(self.path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        except Exception:
+            self.handleError(record)
 
 
 class SelfImprovingLoop:
@@ -84,6 +111,9 @@ class SelfImprovingLoop:
         # 状态文件
         self.state_file = self.data_dir / "loop_state.json"
         self.log_file = self.data_dir / "loop.log"
+        self.logger = logging.getLogger(f"self_improving_loop.loop.{id(self)}")
+        self.logger.setLevel(logging.INFO)
+        self.logger.addHandler(JsonlLogHandler(self.log_file))
         self.traces_file = self.data_dir / "traces.jsonl"
         self.trace_db_file = self.data_dir / "traces.sqlite3"
         if storage == "jsonl":
@@ -555,11 +585,18 @@ class SelfImprovingLoop:
             json.dump(self.state, f, ensure_ascii=False, indent=2)
 
     def _log(self, level: str, message: str):
-        """写日志"""
-        entry = {
-            "timestamp": datetime.now().isoformat(),
-            "level": level,
-            "message": message
+        """Route loop events through stdlib logging."""
+
+        level_map = {
+            "debug": logging.DEBUG,
+            "info": logging.INFO,
+            "success": logging.INFO,
+            "warn": logging.WARNING,
+            "warning": logging.WARNING,
+            "error": logging.ERROR,
         }
-        with open(self.log_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        self.logger.log(
+            level_map.get(level, logging.INFO),
+            message,
+            extra={"taiji_level": level},
+        )
