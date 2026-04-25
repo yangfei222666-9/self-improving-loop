@@ -16,11 +16,12 @@ from self_improving_loop import (
     AutoRollback,
     AdaptiveThreshold,
     ConfigAdapter,
+    JsonlTraceStore,
+    SQLiteTraceStore,
     TelegramNotifier,
     __version__,
 )
 from self_improving_loop.notifier import _encode_for_stdout
-from self_improving_loop.trace_store import JsonlTraceStore
 
 
 def _append_traces_worker(args):
@@ -45,6 +46,8 @@ def test_imports_resolve():
     # If any of these blow up, the package is broken at install-time
     assert SelfImprovingLoop
     assert ConfigAdapter
+    assert JsonlTraceStore
+    assert SQLiteTraceStore
     assert AutoRollback
     assert AdaptiveThreshold
     assert TelegramNotifier
@@ -54,11 +57,34 @@ def test_loop_instantiates_with_tempdir(tmp_path: Path):
     loop = SelfImprovingLoop(data_dir=str(tmp_path))
     assert loop.data_dir == tmp_path
     assert loop.state_file.parent == tmp_path
+    assert loop.storage == "jsonl"
     assert loop.auto_rollback is not None
     assert loop.adaptive_threshold is not None
     assert loop.notifier is not None
     # alias exposed to README-facing users
     assert loop.rollback is loop.auto_rollback
+
+
+def test_loop_supports_sqlite_trace_storage(tmp_path: Path):
+    loop = SelfImprovingLoop(data_dir=str(tmp_path), storage="sqlite")
+    assert loop.storage == "sqlite"
+    assert loop.trace_db_file.exists()
+
+    result = loop.execute_with_improvement(
+        agent_id="sqlite-agent",
+        task="sqlite-backed trace",
+        execute_fn=lambda: {"ok": True},
+    )
+
+    assert result["success"] is True
+    rows = loop._load_traces("sqlite-agent")
+    assert len(rows) == 1
+    assert rows[0]["task"] == "sqlite-backed trace"
+
+
+def test_loop_rejects_unknown_trace_storage(tmp_path: Path):
+    with pytest.raises(ValueError, match="storage must be"):
+        SelfImprovingLoop(data_dir=str(tmp_path), storage="yaml")
 
 
 def test_improvement_strategy_hook_applies_and_records_backup(tmp_path: Path):
@@ -239,6 +265,26 @@ def test_trace_store_skips_corrupt_jsonl_lines(tmp_path: Path):
 
     rows = JsonlTraceStore(traces_file).load(agent_id="ok")
     assert len(rows) == 2
+
+
+def test_sqlite_trace_store_round_trip_and_agent_filter(tmp_path: Path):
+    db_path = tmp_path / "traces.sqlite3"
+    store = SQLiteTraceStore(db_path)
+    store.append({
+        "agent_id": "a",
+        "task": "first",
+        "success": True,
+        "timestamp": "2026-04-25T00:00:00",
+    })
+    store.append({
+        "agent_id": "b",
+        "task": "second",
+        "success": False,
+        "timestamp": "2026-04-25T00:00:01",
+    })
+
+    assert [row["task"] for row in store.load()] == ["first", "second"]
+    assert [row["task"] for row in store.load(agent_id="b")] == ["second"]
 
 
 def test_execute_with_improvement_captures_failure(tmp_path: Path):

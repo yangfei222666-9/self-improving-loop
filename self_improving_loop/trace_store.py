@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import sqlite3
 from pathlib import Path
 from typing import Dict, Iterable, Iterator, List, Optional
 
@@ -76,6 +77,79 @@ class JsonlTraceStore:
                         continue
                     if agent_id is None or trace.get("agent_id") == agent_id:
                         traces.append(trace)
+        return traces
+
+
+class SQLiteTraceStore:
+    """SQLite trace store for multi-worker production runs.
+
+    JSONL stays the default because it is transparent and easy to inspect.
+    SQLite is the safer option when several worker processes append traces over
+    a long-running deployment.  It uses stdlib sqlite3 plus WAL mode; no extra
+    dependency is required.
+    """
+
+    def __init__(self, path: Path | str):
+        self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._init_db()
+
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(str(self.path), timeout=30)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA busy_timeout=30000")
+        return conn
+
+    def _init_db(self) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS traces (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    agent_id TEXT,
+                    timestamp TEXT,
+                    payload TEXT NOT NULL
+                )
+                """
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_traces_agent_id ON traces(agent_id)"
+            )
+
+    def append(self, trace: Dict) -> None:
+        """Append a trace under SQLite's transactional write lock."""
+
+        payload = json.dumps(trace, ensure_ascii=False)
+        with self._connect() as conn:
+            conn.execute(
+                "INSERT INTO traces(agent_id, timestamp, payload) VALUES (?, ?, ?)",
+                (
+                    trace.get("agent_id"),
+                    trace.get("timestamp"),
+                    payload,
+                ),
+            )
+
+    def load(self, agent_id: Optional[str] = None) -> List[Dict]:
+        """Load traces in insertion order."""
+
+        if not self.path.exists():
+            return []
+
+        query = "SELECT payload FROM traces"
+        params: tuple = ()
+        if agent_id is not None:
+            query += " WHERE agent_id = ?"
+            params = (agent_id,)
+        query += " ORDER BY id ASC"
+
+        traces: List[Dict] = []
+        with self._connect() as conn:
+            for (payload,) in conn.execute(query, params):
+                try:
+                    traces.append(json.loads(payload))
+                except json.JSONDecodeError:
+                    continue
         return traces
 
 

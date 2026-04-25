@@ -15,7 +15,7 @@ from .rollback import AutoRollback
 from .threshold import AdaptiveThreshold
 from .notifier import TelegramNotifier
 from .time_utils import parse_trace_timestamp
-from .trace_store import JsonlTraceStore
+from .trace_store import JsonlTraceStore, SQLiteTraceStore
 
 
 class SelfImprovingLoop:
@@ -27,6 +27,7 @@ class SelfImprovingLoop:
         notifier: Optional[TelegramNotifier] = None,
         improvement_strategy: Optional[Any] = None,
         config_adapter: Optional[ConfigAdapter] = None,
+        storage: str = "jsonl",
     ):
         """
         Args:
@@ -43,6 +44,9 @@ class SelfImprovingLoop:
             config_adapter: optional ConfigAdapter that owns real config IO:
                 ``get_config`` before a patch, ``apply_config`` for guarded
                 changes, and ``rollback_config`` when regression is detected.
+            storage: trace storage backend. ``"jsonl"`` keeps transparent
+                append-only files; ``"sqlite"`` uses a WAL-enabled SQLite DB
+                for multi-worker deployments. Both are stdlib-only.
         """
         if data_dir is None:
             data_dir = Path.home() / ".self-improving-loop" / "data"
@@ -55,6 +59,7 @@ class SelfImprovingLoop:
         self.notifier = notifier or TelegramNotifier(enabled=True)
         self.improvement_strategy = improvement_strategy
         self.config_adapter = config_adapter
+        self.storage = storage
         # alias for the README-facing name
         self.rollback = self.auto_rollback
 
@@ -62,7 +67,13 @@ class SelfImprovingLoop:
         self.state_file = self.data_dir / "loop_state.json"
         self.log_file = self.data_dir / "loop.log"
         self.traces_file = self.data_dir / "traces.jsonl"
-        self.trace_store = JsonlTraceStore(self.traces_file)
+        self.trace_db_file = self.data_dir / "traces.sqlite3"
+        if storage == "jsonl":
+            self.trace_store = JsonlTraceStore(self.traces_file)
+        elif storage == "sqlite":
+            self.trace_store = SQLiteTraceStore(self.trace_db_file)
+        else:
+            raise ValueError("storage must be 'jsonl' or 'sqlite'")
 
         # 加载状态
         self.state = self._load_state()

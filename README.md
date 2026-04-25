@@ -8,11 +8,12 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Overhead](https://img.shields.io/badge/overhead-%3C1%25-brightgreen)](#performance)
 
-Most "self-improving agent" projects stop at *"log the failures, let the next run read the log"*. That's a methodology, not a loop. **This package is the loop, as 1,170 lines of pure-stdlib Python** — no framework lock-in, no LLM dependency, no cloud.
+Most "self-improving agent" projects stop at *"log the failures, let the next run read the log"*. That's a methodology, not a loop. **This package is the loop, implemented as a compact pure-stdlib Python runtime** — no framework lock-in, no LLM dependency, no cloud.
 
 Wrap any function, get:
 
 - 📊 **Automatic execution tracking** (success rate, latency, rolling window)
+- 🗄 **Trace storage choice**: readable JSONL by default, SQLite/WAL for multi-worker deployments
 - 🧠 **Adaptive thresholds** per agent profile (high-freq / mid-freq / low-freq / critical)
 - 🛠 **Strategy hook** for proposing improvement configs when failure patterns are detected
 - 🧩 **ConfigAdapter contract** for real config backup / patch / restore
@@ -29,7 +30,8 @@ Extracted from [**TaijiOS**](https://github.com/yangfei222666-9/taiji), where it
 pip install self-improving-loop
 ```
 
-Zero required dependencies. Everything is `datetime`, `json`, `pathlib`, `typing`.
+Zero required dependencies. Everything is Python stdlib, including optional
+SQLite trace storage via `sqlite3`.
 
 ---
 
@@ -114,6 +116,23 @@ python examples/langgraph_style_node.py
 
 The goal is narrow: traces, thresholds, guarded strategy application, and
 rollback evidence around an agent you already have.
+
+---
+
+## Trace storage
+
+By default, traces are written to a readable `traces.jsonl` file with a
+cross-platform sidecar lock. For multi-worker deployments, switch to SQLite:
+
+```python
+from self_improving_loop import SelfImprovingLoop
+
+loop = SelfImprovingLoop(storage="sqlite")
+```
+
+This writes `traces.sqlite3` with WAL mode enabled. The public API is unchanged:
+`execute_with_improvement()` records traces, and the loop reads them back for
+thresholds, metrics, and rollback checks.
 
 ---
 
@@ -257,7 +276,7 @@ Separate operation costs (triggered occasionally, not per-call):
 ## Not a...
 
 - **...methodology doc.** Many "self-improving agent" repos are markdown templates that ask *you* to log learnings to `CLAUDE.md`. This is the runtime loop that does it for you.
-- **...heavyweight framework.** 1,170 LoC of stdlib. Drop it next to your existing code. No decorators forced on you. No background process.
+- **...heavyweight framework.** Compact stdlib code. Drop it next to your existing code. No decorators forced on you. No background process.
 - **...LLM-dependent.** The analysis is statistical, not LLM-based. If you want LLM-authored config tweaks, pass an `improvement_strategy` object and ask your favorite LLM inside its `analyze()` method.
 
 ---
