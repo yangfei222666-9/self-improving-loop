@@ -8,6 +8,7 @@ python examples/02_config_rollback.py
 python examples/03_langgraph_adapter.py
 python examples/04_yijing_strategy.py
 python examples/05_langgraph_regression_guard.py
+python examples/06_hermes_skill_regression_guard.py
 ```
 
 ## 01_basic_tracking.py
@@ -52,3 +53,12 @@ dependency:
 
 Use this when someone asks whether the package is another agent framework or a
 regression guard that can wrap an agent node you already run.
+
+## 06_hermes_skill_regression_guard.py
+
+Proves the Hermes-style skill seam without a Hermes dependency:
+
+`skill call -> bad skill config patch -> repeated failures -> trace -> rollback -> event trail`
+
+Use this when someone asks how the package fits under Hermes, OpenClaw, or any
+skill-based agent runtime instead of competing with it.

@@ -92,3 +92,26 @@ def test_langgraph_regression_guard_example_runs():
         "event trail written:",
     ]:
         assert phrase in output
+
+
+def test_hermes_skill_regression_guard_example_runs():
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "examples" / "06_hermes_skill_regression_guard.py")],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        timeout=20,
+    )
+
+    assert result.returncode == 0, result.stderr
+    output = result.stdout
+    for phrase in [
+        "hermes-style skill baseline pass",
+        "bad skill config patch",
+        "skill repeated failures",
+        "trace recorded",
+        "rollback restores previous config",
+        "event trail written",
+        "event trail path:",
+    ]:
+        assert phrase in output

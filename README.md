@@ -136,6 +136,7 @@ python examples/02_config_rollback.py
 python examples/03_langgraph_adapter.py
 python examples/04_yijing_strategy.py
 python examples/05_langgraph_regression_guard.py
+python examples/06_hermes_skill_regression_guard.py
 ```
 
 They prove the four important contracts:
@@ -145,6 +146,7 @@ They prove the four important contracts:
 - `03_langgraph_adapter.py`: a LangGraph-style node can be wrapped without adopting a new framework.
 - `04_yijing_strategy.py`: traces become six runtime lines, a hexagram state, and a bounded policy patch.
 - `05_langgraph_regression_guard.py`: a LangGraph-style node regresses, traces are recorded, rollback runs, and an event trail survives.
+- `06_hermes_skill_regression_guard.py`: a Hermes-style skill call regresses, rollback restores the skill config, and an event trail survives.
 
 For the verbose rollback event trail, run:
 
@@ -174,6 +176,8 @@ Dependency-free examples show the integration seam:
 
 ```bash
 python examples/03_langgraph_adapter.py
+python examples/05_langgraph_regression_guard.py
+python examples/06_hermes_skill_regression_guard.py
 python examples/wrap_existing_agent.py
 ```
 
