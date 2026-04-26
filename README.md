@@ -14,7 +14,7 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![LLM overhead](https://img.shields.io/badge/LLM%20overhead-%3C1%25-brightgreen)](#performance)
 
-Latest verified release: [v0.1.1](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1) · Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md)
+Latest verified release: [v0.1.1](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1) · Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md) · Hermes-style guard: [docs/HERMES_SKILL_GUARD.md](docs/HERMES_SKILL_GUARD.md)
 
 中文定位：`self-improving-loop` 是 AI Agent 的回归保护层。它包住 LangGraph / Hermes / 自定义 agent 节点，记录 trace，检测成功率或延迟退化，回滚坏配置，并保留可复查事件证据。
 
@@ -126,7 +126,7 @@ To mutate and restore real agent config, provide a strategy hook plus either a
 
 ---
 
-## Run the four useful examples
+## Run the six useful examples
 
 From a repo checkout, start here:
 
@@ -139,7 +139,7 @@ python examples/05_langgraph_regression_guard.py
 python examples/06_hermes_skill_regression_guard.py
 ```
 
-They prove the four important contracts:
+They prove the six important contracts:
 
 - `01_basic_tracking.py`: wrapper records traces and exposes stats.
 - `02_config_rollback.py`: a bad patch is applied, regression is detected, and `ConfigAdapter.rollback_config()` restores the previous config.
