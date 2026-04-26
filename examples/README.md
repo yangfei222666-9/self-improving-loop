@@ -7,6 +7,7 @@ python examples/01_basic_tracking.py
 python examples/02_config_rollback.py
 python examples/03_langgraph_adapter.py
 python examples/04_yijing_strategy.py
+python examples/05_langgraph_regression_guard.py
 ```
 
 ## 01_basic_tracking.py
@@ -41,3 +42,13 @@ Proves the Yijing layer is an engineering state machine, not decoration:
 
 The first version intentionally supports only eight core policy states. It does
 not claim full 64-hexagram coverage.
+
+## 05_langgraph_regression_guard.py
+
+Proves the LangGraph-style reliability claim end to end without a LangGraph
+dependency:
+
+`node call -> trace -> success_rate / latency regression check -> rollback -> event trail`
+
+Use this when someone asks whether the package is another agent framework or a
+regression guard that can wrap an agent node you already run.

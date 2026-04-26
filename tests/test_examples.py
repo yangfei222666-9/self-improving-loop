@@ -69,3 +69,26 @@ def test_langgraph_style_node_example_runs():
         "trace file:",
     ]:
         assert phrase in output
+
+
+def test_langgraph_regression_guard_example_runs():
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "examples" / "05_langgraph_regression_guard.py")],
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        timeout=20,
+    )
+
+    assert result.returncode == 0, result.stderr
+    output = result.stdout
+    for phrase in [
+        "langgraph node baseline pass",
+        "trace recorded",
+        "success_rate / latency regression checked",
+        "regression detected",
+        "rollback executed",
+        "final node recovered",
+        "event trail written:",
+    ]:
+        assert phrase in output
