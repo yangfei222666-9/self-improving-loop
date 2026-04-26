@@ -1,7 +1,12 @@
 # self-improving-loop
 
-> A hexagram-guided reliability loop for AI agents:
-> **trace → six lines → hexagram policy → guarded patch → rollback on regression.**
+> A regression guard for AI agents.
+>
+> Wrap any LangGraph / Hermes / custom agent node.
+> Record traces.
+> Detect success-rate or latency regression.
+> Roll back bad config changes.
+> Preserve event evidence.
 
 [![GitHub Release](https://img.shields.io/github/v/release/yangfei222666-9/self-improving-loop?display_name=tag)](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1)
 [![CI](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml/badge.svg)](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml)
@@ -11,14 +16,14 @@
 
 Latest verified release: [v0.1.1](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1) · Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md)
 
-中文定位：`self-improving-loop` 是一个六爻状态机驱动的 AI Agent 可靠性与回滚层。它记录执行结果，把运行信号映射成六个工程爻位，选择受控策略补丁，并在 Agent 变差时自动回滚。
+中文定位：`self-improving-loop` 是 AI Agent 的回归保护层。它包住 LangGraph / Hermes / 自定义 agent 节点，记录 trace，检测成功率或延迟退化，回滚坏配置，并保留可复查事件证据。
 
 Most "self-improving agent" projects stop at *"log the failures, let the next run read the log"*. That's a methodology, not a loop. **This package is the loop, implemented as a compact pure-stdlib Python runtime** — no framework lock-in, no LLM dependency, no cloud.
 
-The differentiator is the optional Yijing strategy: runtime signals are mapped
-into six engineering lines, recognized as a hexagram state, converted into a
-bounded policy patch, then verified through the same rollback guard as any
-other strategy. It is a state machine, not fortune telling.
+The optional Yijing strategy is an internal policy router: runtime signals are
+mapped into six engineering lines, recognized as a hexagram state, converted
+into a bounded policy patch, then verified through the same rollback guard as
+any other strategy. It is a state machine, not fortune telling.
 
 Overhead is negligible for normal LLM/HTTP agent calls; for sub-10ms in-memory functions, measure before wrapping.
 
@@ -130,6 +135,7 @@ python examples/01_basic_tracking.py
 python examples/02_config_rollback.py
 python examples/03_langgraph_adapter.py
 python examples/04_yijing_strategy.py
+python examples/05_langgraph_regression_guard.py
 ```
 
 They prove the four important contracts:
@@ -138,6 +144,7 @@ They prove the four important contracts:
 - `02_config_rollback.py`: a bad patch is applied, regression is detected, and `ConfigAdapter.rollback_config()` restores the previous config.
 - `03_langgraph_adapter.py`: a LangGraph-style node can be wrapped without adopting a new framework.
 - `04_yijing_strategy.py`: traces become six runtime lines, a hexagram state, and a bounded policy patch.
+- `05_langgraph_regression_guard.py`: a LangGraph-style node regresses, traces are recorded, rollback runs, and an event trail survives.
 
 For the verbose rollback event trail, run:
 
