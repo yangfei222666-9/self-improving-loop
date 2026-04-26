@@ -1,10 +1,16 @@
 # Distribution Targets · 2026-04-26
 
-Status: `draft_only`
+Status: `first_3_sent`
 
 Purpose: prepare targeted distribution for `self-improving-loop v0.1.1` without spamming or pretending traction.
 
 Rule: do not post any comment from this file without explicit user confirmation at action time.
+
+Sent comments:
+
+- OpenClaw #69028: https://github.com/openclaw/openclaw/issues/69028#issuecomment-4320926058
+- GitHub Copilot CLI #2892: https://github.com/github/copilot-cli/issues/2892#issuecomment-4320926495
+- LangGraph #6170: https://github.com/langchain-ai/langgraph/issues/6170#issuecomment-4320926988
 
 Positioning to test:
 
@@ -17,6 +23,10 @@ Do not claim production adoption. Do not claim the library solves the target iss
 ## Target 1 · LangGraph node error handling
 
 URL: https://github.com/langchain-ai/langgraph/issues/6170
+
+Send status: `sent`
+
+Comment URL: https://github.com/langchain-ai/langgraph/issues/6170#issuecomment-4320926988
 
 Why relevant:
 
@@ -52,6 +62,8 @@ Repo, if useful for comparison: https://github.com/yangfei222666-9/self-improvin
 
 URL: https://github.com/langchain-ai/langgraph/issues/6491
 
+Send status: `draft_only`
+
 Why relevant:
 
 - Open bug: invalid state is saved to checkpoint and later becomes unrecoverable.
@@ -84,6 +96,8 @@ Not proposing this as a fix for LangGraph internals, but the issue is a good exa
 ## Target 3 · CrewAI fabricated tool observation / tool not actually invoked
 
 URL: https://github.com/crewAIInc/crewAI/issues/3154
+
+Send status: `draft_only`
 
 Why relevant:
 
@@ -119,6 +133,10 @@ I am building a small regression guard for agent calls around this principle: ma
 
 URL: https://github.com/github/copilot-cli/issues/2892
 
+Send status: `sent`
+
+Comment URL: https://github.com/github/copilot-cli/issues/2892#issuecomment-4320926495
+
 Why relevant:
 
 - Open issue, recent.
@@ -151,6 +169,10 @@ I am working on a small agent regression guard that records exactly these before
 ## Target 5 · OpenClaw Feishu media download silent failure
 
 URL: https://github.com/openclaw/openclaw/issues/69028
+
+Send status: `sent`
+
+Comment URL: https://github.com/openclaw/openclaw/issues/69028#issuecomment-4320926058
 
 Why relevant:
 
@@ -196,4 +218,3 @@ I am building a small regression/silent-failure guard around agent workflows wit
 - Do not send more than 3 comments in one session.
 - If any maintainer replies critically, stop posting and answer that one thread first.
 - If no one reacts, do not rewrite positioning immediately; build one adapter example instead.
-
