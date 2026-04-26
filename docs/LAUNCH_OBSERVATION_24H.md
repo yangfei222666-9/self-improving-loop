@@ -68,6 +68,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | 2026-04-26 08:14 | X | Replied to Eldorado Automate's workflow-reliability comment with the regression-guard positioning: observable failure, rollback evidence, not another agent framework | X notification thread for `@PathToAutomate`; reply count changed to 1 | Low-risk public engagement executed with user-confirmed wording | Re-check replies and release downloads at the next observation window |
 | 2026-04-26 08:17 | GitHub | Post-launch metric refresh: 0 stars, 0 forks, 0 watchers, 0 open issues, 6 wheel downloads, 0 source downloads | `gh repo view`; `gh api releases/tags/v0.1.1`; `gh issue list` | Recorded unchanged GitHub traction; no evidence-based positioning change | Re-check X metrics separately before any new public post |
 | 2026-04-26 08:20 | X | Launch post still shows 10 views, 0 replies, 0 reposts, 0 likes; Eldorado Automate liked the earlier workflow-reliability reply | X profile page; X notifications page | Recorded weak positive engagement but no v0.1.1 launch traction | Do not claim launch validation; next external action should be targeted distribution, not repositioning |
+| 2026-04-26 08:31 | Distribution | Prepared 5 draft-only targeted distribution comments for LangGraph, CrewAI, GitHub Copilot CLI, and OpenClaw discussions | `docs/DISTRIBUTION_TARGETS_20260426.md` | Created send-ready drafts; nothing posted | User confirmation required before any public comment |
 
 ---
 
