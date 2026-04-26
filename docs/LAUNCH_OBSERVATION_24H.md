@@ -71,6 +71,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | 2026-04-26 08:31 | Distribution | Prepared 5 draft-only targeted distribution comments for LangGraph, CrewAI, GitHub Copilot CLI, and OpenClaw discussions | `docs/DISTRIBUTION_TARGETS_20260426.md` | Created send-ready drafts; nothing posted | User confirmation required before any public comment |
 | 2026-04-26 08:47 | Distribution | Sent first 3 targeted GitHub comments: OpenClaw #69028, GitHub Copilot CLI #2892, LangGraph #6170 | `openclaw/openclaw#69028`, `github/copilot-cli#2892`, `langchain-ai/langgraph#6170` | Public comments sent after user confirmed "前三条" | Stop sending; monitor replies before any additional comments |
 | 2026-04-26 09:14 | GitHub | Snapshot: 0 stars, 0 forks, 0 watchers, 0 open issues, 0 PRs, 6 wheel downloads, 0 source downloads; sampled issue comments are owner-only | `gh repo view`; `gh release view v0.1.1`; `gh issue list --state all` | Recorded no external GitHub traction yet; do not rebrand from zero signal | Continue observation; build one adapter example if no external response by 24h |
+| 2026-04-26 09:57 | GitHub / Docs | Added Hermes-style skill guard positioning and demo evidence; repo remains 0 stars, 0 forks, 0 watchers, 0 open issues, 6 wheel downloads, 0 source downloads | commits `4e5545b`, `1abe579`; CI run `24945672596`; `pytest -q` = 61 passed; `gh repo view`; release asset query | Documented the claim as "regression guard under Hermes-style skills", not a Hermes replacement; fixed launch-copy drift to current 61 tests | Next external action should use this narrower wording and log replies/download changes here |
 
 ---
 
@@ -81,7 +82,7 @@ Append one row per real external signal. Do not count internal edits as traction
 | DONE | Capture canonical X post URL | Codex via Computer Use | https://x.com/jiuxiao79/status/2048043783431021014 |
 | TODO | Re-check GitHub stars / forks / release downloads at +6h | Codex | Append snapshot row |
 | TODO | Re-check GitHub stars / forks / release downloads at +24h | Codex | Append final 24h row |
-| TODO | Use corrected `59 tests` count in future launch copy | Codex | No new post repeats stale test-count drift |
+| TODO | Use corrected `61 tests` count in future launch copy | Codex | No new post repeats stale test-count drift |
 | TODO | If someone asks for integration, add one adapter example before changing positioning | Codex | New issue/comment or X reply asks for LangGraph/CrewAI/AutoGen/MCP |
 | HOLD | Do not rewrite README positioning during the 24h window without external evidence | Codex | Only unlock if a real user misunderstands a specific claim |
 
