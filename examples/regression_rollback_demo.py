@@ -14,6 +14,8 @@ from __future__ import annotations
 import json
 import sys
 import tempfile
+import argparse
+import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -107,24 +109,35 @@ def make_task(strategy: BadPatchStrategy, *, forced_failure: bool = False):
     return task
 
 
-def write_event_trail(data_dir: Path, strategy: BadPatchStrategy, steps: list[dict]) -> Path:
+def _with_run_id(record: dict, run_id: str) -> dict:
+    enriched = dict(record)
+    enriched.setdefault("run_id", run_id)
+    return enriched
+
+
+def write_event_trail(
+    data_dir: Path,
+    strategy: BadPatchStrategy,
+    steps: list[dict],
+    run_id: str,
+) -> Path:
     trail_path = data_dir / "regression_rollback_event_trail.jsonl"
     trace_path = data_dir / "traces.jsonl"
     rollback_path = data_dir / "rollback_history.jsonl"
 
     records: list[dict] = []
-    records.extend({"source": "demo", **step} for step in steps)
-    records.extend({"source": "strategy", **event} for event in strategy.events)
+    records.extend(_with_run_id({"source": "demo", **step}, run_id) for step in steps)
+    records.extend(_with_run_id({"source": "strategy", **event}, run_id) for event in strategy.events)
 
     if trace_path.exists():
         for line in trace_path.read_text(encoding="utf-8").splitlines():
             if line.strip():
-                records.append({"source": "trace", **json.loads(line)})
+                records.append(_with_run_id({"source": "trace", **json.loads(line)}, run_id))
 
     if rollback_path.exists():
         for line in rollback_path.read_text(encoding="utf-8").splitlines():
             if line.strip():
-                records.append({"source": "rollback", **json.loads(line)})
+                records.append(_with_run_id({"source": "rollback", **json.loads(line)}, run_id))
 
     with trail_path.open("w", encoding="utf-8") as f:
         for record in records:
@@ -133,9 +146,29 @@ def write_event_trail(data_dir: Path, strategy: BadPatchStrategy, steps: list[di
     return trail_path
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the regression rollback proof demo.")
+    parser.add_argument(
+        "--data-dir",
+        help=(
+            "Optional directory for demo traces and event trail. "
+            "If omitted, a temporary directory is created."
+        ),
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
-    data_dir = Path(tempfile.mkdtemp(prefix="sil_rollback_demo_"))
+    args = parse_args()
+    run_id = f"rollback-demo-{uuid.uuid4().hex}"
+    data_dir = (
+        Path(args.data_dir).expanduser().resolve()
+        if args.data_dir
+        else Path(tempfile.mkdtemp(prefix="sil_rollback_demo_"))
+    )
+    data_dir.mkdir(parents=True, exist_ok=True)
     strategy = BadPatchStrategy()
+    expected_backup_config = dict(strategy.config)
     loop = SelfImprovingLoop(
         data_dir=str(data_dir),
         improvement_strategy=strategy,
@@ -170,7 +203,13 @@ def main() -> int:
         backup_info = loop.state.get("backups", {}).get(AGENT_ID)
         if not backup_info:
             raise AssertionError("expected backup after improvement apply")
-        steps.append({"event": "backup_created", "backup_info": backup_info})
+        steps.append(
+            {
+                "event": "backup_created",
+                "backup_info": backup_info,
+                "expected_backup_config": expected_backup_config,
+            }
+        )
 
         # Prevent repeated demo patches while rollback verification collects
         # post-change evidence. Rollback still runs after every task.
@@ -210,7 +249,7 @@ def main() -> int:
         if not recovered["success"]:
             raise AssertionError("final recovered task should pass after rollback")
 
-        trail_path = write_event_trail(data_dir, strategy, steps)
+        trail_path = write_event_trail(data_dir, strategy, steps, run_id)
         steps.append({"event": "event_trail_written", "path": str(trail_path)})
 
         print("baseline pass")
