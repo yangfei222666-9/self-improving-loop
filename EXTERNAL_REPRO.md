@@ -18,13 +18,13 @@ Use a clean Python environment:
 git clone https://github.com/yangfei222666-9/self-improving-loop.git
 cd self-improving-loop
 
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e .
 
-python examples/regression_rollback_demo.py --data-dir .repro-demo
-python examples/verify_regression_rollback_event_trail.py .repro-demo/regression_rollback_event_trail.jsonl
+python3 examples/regression_rollback_demo.py --data-dir .repro-demo
+python3 examples/verify_regression_rollback_event_trail.py .repro-demo/regression_rollback_event_trail.jsonl
 ```
 
 Expected output shape:
@@ -53,8 +53,8 @@ The important proof is not the console text. The verifier must return `verdict=o
 ## Minimal Test
 
 ```bash
-python -m pip install pytest
-python -m pytest tests/test_examples.py -q
+python3 -m pip install pytest
+python3 -m pytest tests/test_examples.py -q
 ```
 
 Expected:

@@ -131,12 +131,12 @@ To mutate and restore real agent config, provide a strategy hook plus either a
 From a repo checkout, start here:
 
 ```bash
-python examples/01_basic_tracking.py
-python examples/02_config_rollback.py
-python examples/03_langgraph_adapter.py
-python examples/04_yijing_strategy.py
-python examples/05_langgraph_regression_guard.py
-python examples/06_hermes_skill_regression_guard.py
+python3 examples/01_basic_tracking.py
+python3 examples/02_config_rollback.py
+python3 examples/03_langgraph_adapter.py
+python3 examples/04_yijing_strategy.py
+python3 examples/05_langgraph_regression_guard.py
+python3 examples/06_hermes_skill_regression_guard.py
 ```
 
 They prove the six important contracts:
@@ -151,8 +151,8 @@ They prove the six important contracts:
 For the verbose rollback event trail, run:
 
 ```bash
-python examples/regression_rollback_demo.py --data-dir .repro-demo
-python examples/verify_regression_rollback_event_trail.py .repro-demo/regression_rollback_event_trail.jsonl
+python3 examples/regression_rollback_demo.py --data-dir .repro-demo
+python3 examples/verify_regression_rollback_event_trail.py .repro-demo/regression_rollback_event_trail.jsonl
 ```
 
 ---
@@ -176,10 +176,10 @@ result = loop.execute_with_improvement(
 Dependency-free examples show the integration seam:
 
 ```bash
-python examples/03_langgraph_adapter.py
-python examples/05_langgraph_regression_guard.py
-python examples/06_hermes_skill_regression_guard.py
-python examples/wrap_existing_agent.py
+python3 examples/03_langgraph_adapter.py
+python3 examples/05_langgraph_regression_guard.py
+python3 examples/06_hermes_skill_regression_guard.py
+python3 examples/wrap_existing_agent.py
 ```
 
 The goal is narrow: traces, thresholds, guarded strategy application, and
