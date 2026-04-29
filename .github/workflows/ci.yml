@@ -46,6 +46,7 @@ jobs:
           python examples/04_yijing_strategy.py
           python examples/regression_rollback_demo.py --data-dir .repro-demo
           python examples/verify_regression_rollback_event_trail.py .repro-demo/regression_rollback_event_trail.jsonl
+          python examples/verify_agent_eval_cases.py examples/agent_eval_cases.jsonl
           python examples/wrap_existing_agent.py
           python examples/langgraph_style_node.py
           python examples/05_langgraph_regression_guard.py
