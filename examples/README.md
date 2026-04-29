@@ -9,6 +9,7 @@ python examples/03_langgraph_adapter.py
 python examples/04_yijing_strategy.py
 python examples/05_langgraph_regression_guard.py
 python examples/06_hermes_skill_regression_guard.py
+python examples/verify_agent_eval_cases.py examples/agent_eval_cases.jsonl
 ```
 
 ## 01_basic_tracking.py
@@ -62,3 +63,23 @@ Proves the Hermes-style skill seam without a Hermes dependency:
 
 Use this when someone asks how the package fits under Hermes, OpenClaw, or any
 skill-based agent runtime instead of competing with it.
+
+## agent_eval_cases.jsonl
+
+Provides 30 non-authorizing eval cases for coding-agent, tool-calling,
+provider-route, stale-artifact, rollback, and governance failures.
+
+Verify the packet:
+
+```bash
+python examples/verify_agent_eval_cases.py examples/agent_eval_cases.jsonl
+```
+
+Expected boundary:
+
+```text
+judgment_allowed=false
+paper_buy_allowed=false
+trade_allowed=false
+promote_allowed=false
+```
