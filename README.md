@@ -14,7 +14,7 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![LLM overhead](https://img.shields.io/badge/LLM%20overhead-%3C1%25-brightgreen)](#performance)
 
-Latest verified release: [v0.1.1](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1) · External repro: [EXTERNAL_REPRO.md](EXTERNAL_REPRO.md) · Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md) · Hermes-style guard: [docs/HERMES_SKILL_GUARD.md](docs/HERMES_SKILL_GUARD.md)
+Latest verified release: [v0.1.1](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1) · Agent data strategy: [AGENT_DATA_STRATEGY.md](AGENT_DATA_STRATEGY.md) · External repro: [EXTERNAL_REPRO.md](EXTERNAL_REPRO.md) · Launch copy: [English + 中文](LAUNCH_COPY_BILINGUAL.md) · Hermes-style guard: [docs/HERMES_SKILL_GUARD.md](docs/HERMES_SKILL_GUARD.md)
 
 中文定位：`self-improving-loop` 是 AI Agent 的回归保护层。它包住 LangGraph / Hermes / 自定义 agent 节点，记录 trace，检测成功率或延迟退化，回滚坏配置，并保留可复查事件证据。
 
