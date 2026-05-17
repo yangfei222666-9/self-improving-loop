@@ -22,8 +22,8 @@ pre-commit run --all-files
 
 ## PyPI publish path
 
-The `Publish` workflow builds on every manual run and tag push. It publishes to
-PyPI only on `v*` tag pushes.
+The `Publish` workflow builds on every manual run, `v*` tag push, and published
+GitHub Release. It publishes to PyPI only for release/tag events.
 
 Required PyPI setup before tag publishing:
 
@@ -32,4 +32,5 @@ Required PyPI setup before tag publishing:
 - Workflow file: `.github/workflows/publish.yml`.
 - Project name: `self-improving-loop`.
 
-Do not store PyPI API tokens in the repository or GitHub Actions logs.
+Do not store PyPI API tokens in the repository or GitHub Actions logs. The
+workflow uses PyPI Trusted Publishing instead of a `PYPI_API_TOKEN` secret.

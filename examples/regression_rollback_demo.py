@@ -11,10 +11,10 @@ event trail written.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import tempfile
-import argparse
 import uuid
 from pathlib import Path
 
@@ -127,7 +127,9 @@ def write_event_trail(
 
     records: list[dict] = []
     records.extend(_with_run_id({"source": "demo", **step}, run_id) for step in steps)
-    records.extend(_with_run_id({"source": "strategy", **event}, run_id) for event in strategy.events)
+    records.extend(
+        _with_run_id({"source": "strategy", **event}, run_id) for event in strategy.events
+    )
 
     if trace_path.exists():
         for line in trace_path.read_text(encoding="utf-8").splitlines():

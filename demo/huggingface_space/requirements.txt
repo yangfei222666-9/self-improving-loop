@@ -1,0 +1,4 @@
+streamlit>=1.35
+# Use the verified GitHub release artifact until PyPI Trusted Publishing
+# publishes the matching 0.1.1 package.
+self-improving-loop @ https://github.com/yangfei222666-9/self-improving-loop/releases/download/v0.1.1/self_improving_loop-0.1.1-py3-none-any.whl

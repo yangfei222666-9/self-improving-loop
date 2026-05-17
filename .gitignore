@@ -17,4 +17,5 @@ Thumbs.db
 *.egg
 pip-wheel-metadata/
 .repro-demo/
+.demo-traces/
 decision_audit.jsonl

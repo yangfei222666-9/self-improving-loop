@@ -3,8 +3,8 @@
 import json
 import subprocess
 import sys
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -174,12 +174,37 @@ def _valid_records():
     backup = {"mode": "baseline", "timeout_sec": 30, "prompt_variant": "safe-v1"}
     return [
         {"source": "demo", "run_id": run_id, "event": "baseline_pass", "result": {"success": True}},
-        {"source": "demo", "run_id": run_id, "event": "failure_detected", "result": {"success": False}},
-        {"source": "demo", "run_id": run_id, "event": "backup_created", "expected_backup_config": backup},
-        {"source": "strategy", "run_id": run_id, "event": "rollback_restored_config", "config": backup},
-        {"source": "demo", "run_id": run_id, "event": "rollback_executed", "result": {"backup_id": "b1"}},
+        {
+            "source": "demo",
+            "run_id": run_id,
+            "event": "failure_detected",
+            "result": {"success": False},
+        },
+        {
+            "source": "demo",
+            "run_id": run_id,
+            "event": "backup_created",
+            "expected_backup_config": backup,
+        },
+        {
+            "source": "strategy",
+            "run_id": run_id,
+            "event": "rollback_restored_config",
+            "config": backup,
+        },
+        {
+            "source": "demo",
+            "run_id": run_id,
+            "event": "rollback_executed",
+            "result": {"backup_id": "b1"},
+        },
         {"source": "rollback", "run_id": run_id, "backup_id": "b1", "config_restored": backup},
-        {"source": "demo", "run_id": run_id, "event": "final_status_recovered", "result": {"success": True}},
+        {
+            "source": "demo",
+            "run_id": run_id,
+            "event": "final_status_recovered",
+            "result": {"success": True},
+        },
         {"source": "trace", "run_id": run_id, "agent_id": "support-agent-demo", "success": False},
     ]
 
