@@ -12,7 +12,6 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 ALLOWED_LABELS = {
     "artifact_hash_mismatch",
     "config_patch_regression",
@@ -180,4 +179,3 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))
-

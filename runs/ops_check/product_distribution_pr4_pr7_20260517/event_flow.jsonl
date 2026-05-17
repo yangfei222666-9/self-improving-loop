@@ -1,0 +1,42 @@
+{"ts":"2026-05-17T16:20:09+08:00","event":"scope_declared","scope":"product_distribution_pr4_pr7","mode":"edit","repo_root":"/Users/weiwei/Desktop/self-improving-loop","will_not":["git_add","commit","push","release","pypi_upload","hf_space_create","secret_read"]}
+{"ts":"2026-05-17T16:20:09+08:00","event":"repo_selected","candidate":"/Users/weiwei/Desktop/self-improving-loop","reason":"clean git worktree and package name matches self-improving-loop"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"preflight_inventory","pyproject_version":"0.1.1","init_version":"0.1.1","existing_publish_workflow":true,"existing_examples":true,"existing_benchmarks":true}
+{"ts":"2026-05-17T16:20:09+08:00","event":"pypi_probe","command":"python3 -m pip index versions self-improving-loop","status":"ok","observed_latest":"0.1.0","local_version":"0.1.1"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"edit","files":[".github/workflows/publish.yml",".github/workflows/ci.yml",".gitignore","MANIFEST.in","README.md","docs/RELEASE_PROCESS.md","demo/huggingface_space/app.py","demo/huggingface_space/requirements.txt","demo/huggingface_space/README.md"]}
+{"ts":"2026-05-17T16:20:09+08:00","event":"benchmark_bug_found","file":"benchmarks/startup_recovery.py","cause":"direct checkout execution could not import self_improving_loop; fixed import path in benchmark scripts"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"stale_benchmark_found","file":"benchmarks/startup_recovery.py","cause":"fixed 2026-04-26 timestamp made current-window success_rate report 0.0; replaced with runtime timestamp"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"tests_added","files":["tests/test_benchmarks.py","tests/test_huggingface_space_demo.py"]}
+{"ts":"2026-05-17T16:20:09+08:00","event":"verifier","command":"git diff --check","status":"pass"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"verifier","command":"ruby yaml parse for ci.yml and publish.yml","status":"pass"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"verifier","command":"python3 -m compileall -q self_improving_loop examples benchmarks demo tests","status":"pass"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"verifier","command":"python3 -m pytest -q","status":"pass","result":"69 passed in 1.53s"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"verifier","command":"python3 benchmarks/startup_recovery.py --traces 10 100","status":"pass","result":"success_rate=0.9 for both trace counts"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"verifier","command":"build and twine check in ignored .venv with temp dist","status":"pass","dist_dir":"/tmp/self_improving_loop_dist_vojeb1"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"artifact_parse","command":"parse summary.json and event_flow.jsonl","status":"pass"}
+{"ts":"2026-05-17T16:20:09+08:00","event":"scope_dry_run","command":"git add --dry-run .","status":"pass","candidate_file_count":16,"changed_files_outside_scope":0}
+{"ts":"2026-05-17T16:20:09+08:00","event":"staged_count","command":"git diff --cached --name-only | wc -l","status":"pass","staged_count":0}
+{"ts":"2026-05-17T16:20:09+08:00","event":"boundary","pypi_upload":false,"hf_space_create":false,"git_stage":false,"git_commit":false,"git_push":false,"reason":"external visible and git state-changing actions require user confirmation"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"continue_scope","scope":"product_distribution_pre_stage_hardening","mode":"verify","will_not":["git_add","commit","push","release","pypi_upload","hf_space_create","secret_read"]}
+{"ts":"2026-05-17T16:26:50+08:00","event":"tool_install","target":".venv","packages":["pre-commit","ruff","black","mypy"],"status":"ok","artifact_boundary":"ignored local venv only"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"pre_commit_first_run","command":".venv/bin/pre-commit run --all-files","status":"failed_then_modified","cause":"ruff import ordering and black formatting changes in existing examples/tests; mypy passed"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"format_fix","command":".venv/bin/ruff check --fix examples/regression_rollback_demo.py examples/verify_regression_rollback_event_trail.py tests/test_examples.py tests/test_agent_eval_cases.py examples/verify_agent_eval_cases.py","status":"pass","result":"5 fixed"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"pre_commit_final","command":".venv/bin/pre-commit run --all-files","status":"pass","checks":["ruff check","black","mypy"]}
+{"ts":"2026-05-17T16:26:50+08:00","event":"verifier","command":"git diff --check","status":"pass"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"verifier","command":"python3 -m compileall -q self_improving_loop examples benchmarks demo tests","status":"pass"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"verifier","command":"python3 -m pytest -q","status":"pass","result":"69 passed in 6.84s"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"verifier","command":"python3 benchmarks/startup_recovery.py --traces 10 100","status":"pass","result":"success_rate=0.9 for both trace counts"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"verifier","command":"build and twine check in ignored .venv with temp dist","status":"pass","dist_dir":"/tmp/self_improving_loop_dist_ojIJhE"}
+{"ts":"2026-05-17T16:26:50+08:00","event":"scope_dry_run","command":"git add --dry-run .","status":"pass","candidate_file_count":22,"changed_files_outside_scope":0}
+{"ts":"2026-05-17T16:26:50+08:00","event":"staged_count","command":"git diff --cached --name-only | wc -l","status":"pass","staged_count":0}
+{"ts":"2026-05-17T16:28:07+08:00","event":"continue_scope","scope":"stage_authorization_packet_only","mode":"package","will_not":["git_add","commit","push","release","pypi_upload","hf_space_create","secret_read"]}
+{"ts":"2026-05-17T16:28:07+08:00","event":"stage_authorization_packet_written","path":"runs/ops_check/product_distribution_pr4_pr7_20260517/STAGE_AUTHORIZATION_PACKET.md","status":"awaiting_user_confirmation","recommended_stage_style":"explicit_paths"}
+{"ts":"2026-05-17T16:29:14+08:00","event":"continue_scope","scope":"pr_scope_split_review_no_git_mutation","mode":"package","will_not":["git_add","commit","push","branch_create","release","pypi_upload","hf_space_create","secret_read"]}
+{"ts":"2026-05-17T16:29:14+08:00","event":"pr_scope_split_review_written","path":"runs/ops_check/product_distribution_pr4_pr7_20260517/PR_SCOPE_SPLIT_REVIEW.md","status":"read_only_review_complete","recommendation":"single_pr_preferred","staged_count":0}
+{"ts":"2026-05-17T16:30:21+08:00","event":"blocked","scope":"blocked_git_stage_closeout","blocked_stage":"git_stage_authorization","failure_cause":"user said continue, but explicit git mutation authorization is required before git add, branch creation, commit, push, tag, release, or PR operations","evidence_path":"runs/ops_check/product_distribution_pr4_pr7_20260517/BLOCKED_GIT_STAGE_20260517.md","staged_count":0,"next_allowed_action":"wait for explicit git authorization"}
+{"ts":"2026-05-17T16:37:22+08:00","event":"authorization_received","scope":"authorized_local_branch_stage_commit_no_push","authorized_actions":["create_local_branch","git_add","git_commit"],"forbidden_actions":["push","tag","release","pr","pypi_upload","hf_space_create","secret_read"],"user_text":"允许创建本地分支、git add、commit，不 push"}
+{"ts":"2026-05-17T16:37:22+08:00","event":"branch_created","branch":"product/distribution-demo-pypi","status":"ok"}
+{"ts":"2026-05-17T16:38:30+08:00","event":"git_add","stage_style":"explicit_paths","status":"ok","staged_count_before_audit":25}
+{"ts":"2026-05-17T16:38:30+08:00","event":"pre_commit_after_stage_first_run","status":"failed","cause":"new demo/test files needed ruff import-order fixes","black":"pass","mypy":"pass","pytest":"pass","compileall":"pass"}
+{"ts":"2026-05-17T16:38:30+08:00","event":"format_fix","command":".venv/bin/ruff check --fix demo/huggingface_space/app.py tests/test_benchmarks.py tests/test_huggingface_space_demo.py","status":"pass","result":"3 fixed"}
+{"ts":"2026-05-17T16:38:30+08:00","event":"pre_commit_after_stage_final","command":".venv/bin/pre-commit run --all-files","status":"pass","checks":["ruff check","black","mypy"]}
+{"ts":"2026-05-17T16:38:30+08:00","event":"staged_scope_audit_written","path":"runs/ops_check/product_distribution_pr4_pr7_20260517/STAGED_SCOPE_AUDIT.md","status":"pass","expected_final_staged_count":26}

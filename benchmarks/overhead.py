@@ -10,8 +10,13 @@ Usage:
 """
 
 import statistics
+import sys
 import tempfile
 import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
 from self_improving_loop import SelfImprovingLoop
 

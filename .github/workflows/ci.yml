@@ -32,7 +32,7 @@ jobs:
 
       - name: Compile core files
         run: |
-          python -m compileall -q self_improving_loop examples
+          python -m compileall -q self_improving_loop examples demo
 
       - name: Run tests
         run: |

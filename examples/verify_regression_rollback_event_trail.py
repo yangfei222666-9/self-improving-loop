@@ -11,7 +11,6 @@ import json
 import sys
 from pathlib import Path
 
-
 REQUIRED_EVENTS = {
     "baseline_pass",
     "failure_detected",
@@ -61,7 +60,9 @@ def main(argv: list[str]) -> int:
     missing_events = sorted(REQUIRED_EVENTS - events)
     has_trace = "trace" in sources
     has_rollback = "rollback" in sources
-    has_strategy_restore = any(record.get("event") == "rollback_restored_config" for record in records)
+    has_strategy_restore = any(
+        record.get("event") == "rollback_restored_config" for record in records
+    )
     final_recovered_ok = any(
         record.get("event") == "final_status_recovered"
         and ((record.get("result") or {}).get("success") is True)
@@ -80,16 +81,23 @@ def main(argv: list[str]) -> int:
     )
 
     backup_records = [record for record in records if record.get("event") == "backup_created"]
-    restore_records = [record for record in records if record.get("event") == "rollback_restored_config"]
-    expected_backup_config = backup_records[-1].get("expected_backup_config") if backup_records else None
+    restore_records = [
+        record for record in records if record.get("event") == "rollback_restored_config"
+    ]
+    expected_backup_config = (
+        backup_records[-1].get("expected_backup_config") if backup_records else None
+    )
     restored_config = restore_records[-1].get("config") if restore_records else None
-    rollback_matches_backup = bool(expected_backup_config and restored_config == expected_backup_config)
+    rollback_matches_backup = bool(
+        expected_backup_config and restored_config == expected_backup_config
+    )
 
     rollback_events = [record for record in records if record.get("event") == "rollback_executed"]
-    rollback_backup_id = ((rollback_events[-1].get("result") or {}).get("backup_id") if rollback_events else None)
+    rollback_backup_id = (
+        (rollback_events[-1].get("result") or {}).get("backup_id") if rollback_events else None
+    )
     rollback_source_matches = any(
-        record.get("source") == "rollback"
-        and record.get("backup_id") == rollback_backup_id
+        record.get("source") == "rollback" and record.get("backup_id") == rollback_backup_id
         for record in records
     )
 

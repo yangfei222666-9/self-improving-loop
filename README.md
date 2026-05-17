@@ -9,6 +9,8 @@
 > Preserve event evidence.
 
 [![GitHub Release](https://img.shields.io/github/v/release/yangfei222666-9/self-improving-loop?display_name=tag)](https://github.com/yangfei222666-9/self-improving-loop/releases/tag/v0.1.1)
+[![PyPI](https://img.shields.io/pypi/v/self-improving-loop.svg)](https://pypi.org/project/self-improving-loop/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/self-improving-loop.svg)](https://pypi.org/project/self-improving-loop/)
 [![CI](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml/badge.svg)](https://github.com/yangfei222666-9/self-improving-loop/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
@@ -48,7 +50,13 @@ Demo artifacts: [terminal transcript](assets/demo/self_improving_loop_demo.txt) 
 
 ## Install
 
-Latest verified GitHub release:
+PyPI:
+
+```bash
+pip install self-improving-loop
+```
+
+Latest verified GitHub release artifact:
 
 ```bash
 pip install https://github.com/yangfei222666-9/self-improving-loop/releases/download/v0.1.1/self_improving_loop-0.1.1-py3-none-any.whl
@@ -62,6 +70,22 @@ pip install git+https://github.com/yangfei222666-9/self-improving-loop.git@v0.1.
 
 Zero required dependencies. Everything is Python stdlib, including optional
 SQLite trace storage via `sqlite3`.
+
+---
+
+## Demo
+
+Local Streamlit demo:
+
+```bash
+python3 -m pip install streamlit
+python3 -m streamlit run demo/huggingface_space/app.py
+```
+
+Hugging Face Space source lives in
+[`demo/huggingface_space/`](demo/huggingface_space/). Create a public
+Streamlit Space and upload `app.py` plus `requirements.txt`. Until that Space is
+created, this repository contains demo source, not a public showcase URL.
 
 ---
 
@@ -96,7 +120,7 @@ Experimental:
 
 ---
 
-## 30-second example
+## Quickstart
 
 ```python
 from self_improving_loop import SelfImprovingLoop
@@ -194,6 +218,21 @@ python3 examples/wrap_existing_agent.py
 
 The goal is narrow: traces, thresholds, guarded strategy application, and
 rollback evidence around an agent you already have.
+
+---
+
+## Architecture
+
+`agent callable -> trace store -> adaptive threshold -> strategy hook -> config adapter -> rollback guard -> notifier`
+
+The runtime keeps the loop inside your process:
+
+- The agent callable is the code you already run.
+- JSONL or SQLite trace storage preserves execution evidence.
+- Adaptive thresholds decide when repeated failure deserves analysis.
+- A strategy hook may propose a bounded config patch.
+- `ConfigAdapter` owns real config backup, patch, and restore.
+- Rollback checks protect against worse success rate, latency, or consecutive failures.
 
 ---
 
@@ -406,7 +445,7 @@ The wrapper adds a stable **~300 μs of fixed cost per call** (trace append + th
 
 Rerun the benchmark on your own machine with `python benchmarks/overhead.py`.
 
-Restart / recovery startup cost can be checked with:
+For startup / recovery cost:
 
 ```bash
 python benchmarks/startup_recovery.py --traces 1000 10000 100000
@@ -422,6 +461,34 @@ Separate operation costs (triggered occasionally, not per-call):
 | Failure analysis (only when threshold crossed) | ~100 ms |
 | Applying improvement config | ~200 ms |
 | Rollback execution | ~10 ms |
+
+---
+
+## Roadmap
+
+- LangGraph integration package with state-machine examples.
+- OpenTelemetry export for Langfuse, Phoenix, and Weave.
+- Evaluation harness examples for promptfoo / deepeval-style regression tests.
+- Multi-model strategy examples for OpenAI, Anthropic, Gemini, and Ollama.
+- More production adapters for config stores and agent runtimes.
+
+---
+
+## Contributing
+
+Start with a small reproducible example. Good issues include a failing trace,
+expected rollback behavior, and the command used to reproduce it.
+
+Before opening a PR:
+
+```bash
+python -m pytest -q
+python -m compileall -q self_improving_loop examples benchmarks demo
+python benchmarks/overhead.py
+```
+
+Keep examples dependency-light and avoid claims that are not backed by a test,
+verifier, trace, or release artifact.
 
 ---
 

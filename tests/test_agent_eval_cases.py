@@ -4,7 +4,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -28,4 +27,3 @@ def test_agent_eval_cases_verify():
     assert "paper_buy_allowed=false" in result.stdout
     assert "trade_allowed=false" in result.stdout
     assert "promote_allowed=false" in result.stdout
-

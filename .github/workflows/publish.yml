@@ -1,6 +1,8 @@
 name: Publish
 
 on:
+  release:
+    types: [published]
   push:
     tags:
       - "v*"
@@ -35,7 +37,7 @@ jobs:
 
       - name: Compile core files
         run: |
-          python -m compileall -q self_improving_loop examples benchmarks
+          python -m compileall -q self_improving_loop examples benchmarks demo
 
       - name: Build wheel and sdist
         run: |
@@ -55,7 +57,7 @@ jobs:
     name: Publish to PyPI
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
     environment: pypi
     permissions:
       id-token: write

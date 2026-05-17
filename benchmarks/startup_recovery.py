@@ -9,9 +9,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import tempfile
 import time
+from datetime import datetime
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
 
 from self_improving_loop import SelfImprovingLoop
 
@@ -19,6 +24,7 @@ from self_improving_loop import SelfImprovingLoop
 def _seed_traces(data_dir: Path, count: int, agent_id: str) -> None:
     data_dir.mkdir(parents=True, exist_ok=True)
     traces_file = data_dir / "traces.jsonl"
+    timestamp = datetime.now().isoformat()
     with open(traces_file, "w", encoding="utf-8") as f:
         for index in range(count):
             f.write(
@@ -28,7 +34,7 @@ def _seed_traces(data_dir: Path, count: int, agent_id: str) -> None:
                         "task": f"benchmark-task-{index}",
                         "success": index % 10 != 0,
                         "duration_sec": 0.01 + (index % 5) * 0.001,
-                        "timestamp": "2026-04-26T00:00:00",
+                        "timestamp": timestamp,
                     }
                 )
                 + "\n"

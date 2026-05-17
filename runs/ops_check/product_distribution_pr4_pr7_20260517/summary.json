@@ -1,0 +1,129 @@
+{
+  "verdict": "ok_local_pr_ready_external_publish_blocked",
+  "scope": "product_distribution_pr4_pr7",
+  "mode": "edit",
+  "repo_root": "/Users/weiwei/Desktop/self-improving-loop",
+  "base_commit": "bedb1b3",
+  "completed_at": "2026-05-17T16:26:50+08:00",
+  "changed_files_outside_scope": 0,
+  "staged_count": 0,
+  "local_package_version": "0.1.1",
+  "pypi_observed_latest": "0.1.0",
+  "pypi_probe_command": "python3 -m pip index versions self-improving-loop",
+  "external_actions": {
+    "git_stage": false,
+    "git_commit": false,
+    "git_push": false,
+    "github_release": false,
+    "pypi_upload": false,
+    "huggingface_space_create": false
+  },
+  "stage_authorization": {
+    "status": "awaiting_user_confirmation",
+    "packet": "runs/ops_check/product_distribution_pr4_pr7_20260517/STAGE_AUTHORIZATION_PACKET.md",
+    "recommended_branch": "product/distribution-demo-pypi",
+    "recommended_commit_message": "build: productize distribution and demo packaging"
+  },
+  "scope_split_review": {
+    "status": "read_only_review_complete",
+    "packet": "runs/ops_check/product_distribution_pr4_pr7_20260517/PR_SCOPE_SPLIT_REVIEW.md",
+    "recommendation": "single_pr_preferred",
+    "reason": "README, demo, manifest, workflow, benchmark test, formatter, and audit artifacts are coupled by the verified release gate."
+  },
+  "git_authorization": {
+    "status": "authorized_local_only",
+    "authorized_actions": [
+      "create_local_branch",
+      "git_add",
+      "git_commit"
+    ],
+    "forbidden_actions": [
+      "push",
+      "tag",
+      "release",
+      "pr",
+      "pypi_upload",
+      "hf_space_create",
+      "secret_read"
+    ],
+    "authorized_at": "2026-05-17T16:37:22+08:00",
+    "branch": "product/distribution-demo-pypi"
+  },
+  "staged_scope_audit": {
+    "status": "pass",
+    "path": "runs/ops_check/product_distribution_pr4_pr7_20260517/STAGED_SCOPE_AUDIT.md",
+    "staged_count_before_audit": 25,
+    "expected_final_staged_count": 26,
+    "unstaged_after_restaging": 0
+  },
+  "changes": [
+    "Added release.published trigger to the existing trusted-publishing workflow instead of creating a duplicate PyPI uploader.",
+    "Added Hugging Face / Streamlit demo source under demo/huggingface_space with deterministic no-provider execution.",
+    "Productized README with PyPI badges, install path, demo path, quickstart, architecture, roadmap, and contribution guidance.",
+    "Included demo files in the source distribution via MANIFEST.in.",
+    "Fixed benchmark scripts so they run from a clean checkout and removed stale timestamp behavior from startup_recovery.py.",
+    "Added tests for the Space demo files and benchmark checkout execution.",
+    "Ran pre-commit hardening and accepted formatter-only changes in existing example/test files so the release gate passes."
+  ],
+  "verification": [
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    },
+    {
+      "command": "ruby -e 'require \"yaml\"; ARGV.each { |f| YAML.load_file(f); puts \"yaml ok #{f}\" }' .github/workflows/ci.yml .github/workflows/publish.yml",
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m compileall -q self_improving_loop examples benchmarks demo tests",
+      "status": "pass"
+    },
+    {
+      "command": "python3 -m pytest -q",
+      "status": "pass",
+      "result": "69 passed in 6.84s"
+    },
+    {
+      "command": ".venv/bin/pre-commit run --all-files",
+      "status": "pass",
+      "result": "ruff check, black, mypy passed after formatter/import-order fixes"
+    },
+    {
+      "command": "python3 benchmarks/startup_recovery.py --traces 10 100",
+      "status": "pass",
+      "result": "trace_count=10 success_rate=0.9; trace_count=100 success_rate=0.9"
+    },
+    {
+      "command": ".venv/bin/python -m build --outdir /tmp/self_improving_loop_dist_ojIJhE && .venv/bin/python -m twine check /tmp/self_improving_loop_dist_ojIJhE/*",
+      "status": "pass",
+      "result": "wheel and sdist built; twine check passed"
+    },
+    {
+      "command": "python3 parse summary.json and event_flow.jsonl",
+      "status": "pass",
+      "result": "artifact_parse=ok"
+    },
+    {
+      "command": "git add --dry-run .",
+      "status": "pass",
+      "result": "22 candidate files, all within product_distribution_pr4_pr7 plus pre_stage_hardening scope"
+    },
+    {
+      "command": "git diff --cached --name-only | wc -l",
+      "status": "pass",
+      "result": "0"
+    }
+  ],
+  "blocked_external_steps": [
+    {
+      "stage": "pypi_publish_0.1.1",
+      "cause": "External publish requires user authorization and PyPI trusted publishing configuration.",
+      "minimum_fix": "Confirm release/tag publish after reviewing this local PR scope."
+    },
+    {
+      "stage": "huggingface_space_public_url",
+      "cause": "Creating a public Space is an external visible remote action.",
+      "minimum_fix": "User confirms HF Space creation/upload, then use demo/huggingface_space as source."
+    }
+  ]
+}

@@ -92,7 +92,11 @@ class SkillConfigAdapter:
     def apply_config(self, agent_id: str, config_patch: Dict[str, Any]) -> bool:
         self.config.update(config_patch)
         self.events.append(
-            {"event": "skill_config_patch_applied", "agent_id": agent_id, "config": dict(self.config)}
+            {
+                "event": "skill_config_patch_applied",
+                "agent_id": agent_id,
+                "config": dict(self.config),
+            }
         )
         return True
 
