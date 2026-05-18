@@ -7,7 +7,7 @@ PyPI publishing is automated only after PyPI Trusted Publishing is configured.
 
 ```bash
 python -m pytest -q
-python -m compileall -q self_improving_loop examples benchmarks
+python -m compileall -q self_improving_loop examples benchmarks demo tests
 python -m build
 python -m twine check dist/*
 pre-commit run --all-files
@@ -34,3 +34,12 @@ Required PyPI setup before tag publishing:
 
 Do not store PyPI API tokens in the repository or GitHub Actions logs. The
 workflow uses PyPI Trusted Publishing instead of a `PYPI_API_TOKEN` secret.
+
+## Version selection notes
+
+- `v0.1.1` is an existing GitHub Release tag that points to commit
+  `11676025c8087e5fa2b79060bb9f2b6868db0720`.
+- PyPI still has only `0.1.0`, so do not try to republish `0.1.1` from a
+  different commit.
+- Use `0.1.2` for the next PyPI publish attempt after Trusted Publishing is
+  configured.

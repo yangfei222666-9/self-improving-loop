@@ -1,0 +1,14 @@
+{"ts":"2026-05-18T20:30:00+08:00","event":"scope_declared","scope":"release_0_1_2_local_prep","mode":"edit","repo_root":"/Users/weiwei/Desktop/self-improving-loop","will_not":["tag","release","pypi_upload","huggingface_space_create","git_add","git_commit","git_push","stash_apply_or_drop","secret_read"]}
+{"ts":"2026-05-18T20:31:00+08:00","event":"pypi_observed","package":"self-improving-loop","latest_version":"0.1.0","publish_attempted":false}
+{"ts":"2026-05-18T20:35:00+08:00","event":"version_prep_applied","target_version":"0.1.2","files":["pyproject.toml","self_improving_loop/__init__.py","CHANGELOG.md","docs/RELEASE_PROCESS.md","docs/RELEASE_READINESS_v0.1.2.md"]}
+{"ts":"2026-05-18T20:39:00+08:00","event":"verification","command":"python3 -m compileall -q self_improving_loop examples benchmarks demo tests","status":"passed"}
+{"ts":"2026-05-18T20:39:00+08:00","event":"verification","command":"python3 -m pytest -q","status":"passed","evidence":"69 passed in 3.48s"}
+{"ts":"2026-05-18T20:39:00+08:00","event":"verification","command":"git diff --check","status":"passed"}
+{"ts":"2026-05-18T20:40:00+08:00","event":"verification","command":"static version consistency check","status":"passed","evidence":"pyproject.toml=0.1.2 self_improving_loop.__version__=0.1.2 changelog_has_0_1_2=true"}
+{"ts":"2026-05-18T20:42:00+08:00","event":"verification","command":".venv/bin/pre-commit run --all-files","status":"passed","evidence":"ruff check, black, mypy passed"}
+{"ts":"2026-05-18T20:44:00+08:00","event":"build","command":".venv/bin/python -m build --outdir /tmp/self_improving_loop_dist_0_1_2_readiness_20260518","status":"passed","artifacts":["/tmp/self_improving_loop_dist_0_1_2_readiness_20260518/self_improving_loop-0.1.2-py3-none-any.whl","/tmp/self_improving_loop_dist_0_1_2_readiness_20260518/self_improving_loop-0.1.2.tar.gz"]}
+{"ts":"2026-05-18T20:44:00+08:00","event":"verification","command":".venv/bin/python -m twine check /tmp/self_improving_loop_dist_0_1_2_readiness_20260518/*","status":"passed"}
+{"ts":"2026-05-18T20:45:00+08:00","event":"verification","command":"clean wheel install smoke","status":"passed","evidence":"cli=self-improving-loop 0.1.2 module=0.1.2"}
+{"ts":"2026-05-18T20:45:00+08:00","event":"verification","command":"sdist content check","status":"passed","evidence":"sdist contains changelog, benchmarks, demo/huggingface_space, and tests"}
+{"ts":"2026-05-18T20:46:07+08:00","event":"closeout","verdict":"local_prep_pass_publish_blocked","staged_count":0,"changed_files_outside_scope":0,"publish_attempted":false,"next_allowed_action":"User may authorize git add and commit for the local 0.1.2 release prep scope."}
+{"ts":"2026-05-18T20:52:00+08:00","event":"stage_commit_authorized","scope":"release_0_1_2_stage_commit","commit_message":"build: prepare v0.1.2 release","publish_attempted":false,"will_not":["push","tag","release","pypi_upload","huggingface_space_create","stash_apply_or_drop","secret_read"]}

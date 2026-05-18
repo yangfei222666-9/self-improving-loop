@@ -1,0 +1,103 @@
+{
+  "run_id": "release_0_1_2_local_prep_20260518",
+  "generated_at": "2026-05-18T20:46:07+08:00",
+  "repo_root": "/Users/weiwei/Desktop/self-improving-loop",
+  "branch": "main",
+  "head": "efe3082d8e2918d7ff7f1a6b064e4fc1d6792dae",
+  "scope": "release_0_1_2_local_prep",
+  "mode": "edit",
+  "verdict": "local_prep_pass_commit_authorized_publish_blocked",
+  "publish_status": "not_attempted",
+  "blocked_stage": "external_release_or_pypi_publish",
+  "failure_cause": "Publishing requires explicit authorization plus PyPI Trusted Publishing confirmation; no tag, release, upload, or workflow dispatch was performed.",
+  "minimum_fix": "Review and commit the 0.1.2 version bump, confirm PyPI Trusted Publishing environment `pypi`, then explicitly authorize tag/release publishing.",
+  "next_allowed_action": "After local commit, user may authorize the next GitHub boundary separately; tag/release/PyPI publish remains blocked.",
+  "stage_commit": {
+    "authorized": true,
+    "commit_message": "build: prepare v0.1.2 release",
+    "status_at_artifact_write": "pending"
+  },
+  "versions": {
+    "local_target": "0.1.2",
+    "pypi_latest_observed": "0.1.0",
+    "existing_github_release": "v0.1.1",
+    "existing_github_release_commit": "11676025c8087e5fa2b79060bb9f2b6868db0720"
+  },
+  "changed_files_in_scope": [
+    "CHANGELOG.md",
+    "docs/RELEASE_PROCESS.md",
+    "docs/RELEASE_READINESS_v0.1.2.md",
+    "pyproject.toml",
+    "self_improving_loop/__init__.py",
+    "runs/ops_check/release_0_1_2_local_prep_20260518/summary.json",
+    "runs/ops_check/release_0_1_2_local_prep_20260518/event_flow.jsonl",
+    "runs/ops_check/release_0_1_2_local_prep_20260518/RELEASE_0_1_2_LOCAL_PREP_CLOSEOUT.md"
+  ],
+  "changed_files_outside_scope": 0,
+  "staged_count": 0,
+  "stash_preserved": true,
+  "preserved_stash": "stash@{Sun May 17 17:30:11 2026}: On product/distribution-demo-pypi: post-pr audit tail 20260517",
+  "verification": [
+    {
+      "command": "python3 -m pip index versions self-improving-loop",
+      "status": "passed",
+      "evidence": "PyPI latest and installed version observed as 0.1.0."
+    },
+    {
+      "command": "python3 -m compileall -q self_improving_loop examples benchmarks demo tests",
+      "status": "passed"
+    },
+    {
+      "command": "python3 -m pytest -q",
+      "status": "passed",
+      "evidence": "69 passed in 3.48s"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    },
+    {
+      "command": "static version consistency check",
+      "status": "passed",
+      "evidence": "pyproject.toml and self_improving_loop.__version__ both equal 0.1.2; CHANGELOG.md has 0.1.2 entry."
+    },
+    {
+      "command": ".venv/bin/pre-commit run --all-files",
+      "status": "passed",
+      "evidence": "ruff check, black, and mypy passed."
+    },
+    {
+      "command": ".venv/bin/python -m build --outdir /tmp/self_improving_loop_dist_0_1_2_readiness_20260518",
+      "status": "passed",
+      "evidence": "Built self_improving_loop-0.1.2.tar.gz and self_improving_loop-0.1.2-py3-none-any.whl."
+    },
+    {
+      "command": ".venv/bin/python -m twine check /tmp/self_improving_loop_dist_0_1_2_readiness_20260518/*",
+      "status": "passed",
+      "evidence": "wheel and sdist passed."
+    },
+    {
+      "command": "clean wheel install smoke",
+      "status": "passed",
+      "evidence": "self-improving-loop --version returned self-improving-loop 0.1.2; module version returned 0.1.2."
+    },
+    {
+      "command": "sdist content check",
+      "status": "passed",
+      "evidence": "sdist contains CHANGELOG.md, benchmarks, demo/huggingface_space, and tests."
+    }
+  ],
+  "dist": {
+    "path": "/tmp/self_improving_loop_dist_0_1_2_readiness_20260518",
+    "wheel_sha256": "b4491a9282b22d20bd72e5d1aef1ed832ae5ea5b536fa8ba0e005c11a3cf6edf",
+    "sdist_sha256": "b24d98f90a7197e9be7712cebb0a1c198f6086506c4510a055f31a66f2f17db0"
+  },
+  "not_performed": [
+    "git push",
+    "tag creation",
+    "GitHub Release creation",
+    "PyPI upload",
+    "Hugging Face Space creation",
+    "secret read"
+  ]
+}

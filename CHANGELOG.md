@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.2
+
+- Add a productized README surface for installation, demo, architecture, roadmap, and contribution flows.
+- Add Streamlit / Hugging Face Space demo source under `demo/huggingface_space/`.
+- Extend CI and publish compile gates to cover `demo/`.
+- Include demo source files in source distributions via `MANIFEST.in`.
+- Fix benchmark checkout execution and current-window startup recovery metrics.
+- Add benchmark and demo packaging tests.
+- Keep `0.1.1` as a GitHub Release artifact only; publish the next PyPI-ready package as `0.1.2`.
+
 ## 0.1.1
 
 - Make the Yijing / hexagram-guided strategy the primary public entrypoint.
