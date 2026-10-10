@@ -4,7 +4,7 @@ Self-Improving Loop - Core Module
 让 AI Agent 自动进化的完整闭环系统
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __author__ = "Self-Improving Loop Contributors"
 
 from .adapters import ConfigAdapter

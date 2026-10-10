@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Mark the project inactive: the README now points to [taiji](https://github.com/yangfei222666-9/taiji), where the mainline continues.
+- Set the `Development Status :: 7 - Inactive` classifier. No code changes since `0.1.2`.
+
 ## 0.1.2
 
 - Add a productized README surface for installation, demo, architecture, roadmap, and contribution flows.

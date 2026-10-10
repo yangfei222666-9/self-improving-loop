@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "self-improving-loop"
-version = "0.1.2"
+version = "0.1.3"
 description = "A hexagram-guided reliability loop for AI agents: trace runtime signals, choose guarded patches, and roll back regressions."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -26,7 +26,7 @@ keywords = [
     "taijios",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 7 - Inactive",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
