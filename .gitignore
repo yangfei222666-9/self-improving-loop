@@ -19,3 +19,8 @@ pip-wheel-metadata/
 .repro-demo/
 .demo-traces/
 decision_audit.jsonl
+
+# Local env files may hold API keys; keep only the example template trackable.
+.env
+.env.*
+!.env.example
